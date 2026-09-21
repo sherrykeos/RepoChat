@@ -1,4 +1,4 @@
-package devPilot.backend.controllers;
+package devPilot.backend.controller;
 
 import java.util.List;
 import java.util.UUID;

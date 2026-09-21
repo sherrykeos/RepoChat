@@ -68,7 +68,7 @@ public class SecurityConfig {
 
     @Bean 
     public AuthenticationSuccessHandler oauth2SuccessHandler(
-            @Value("${app.frontend.url:http://localhost:5173}") String frontendUrl) {
+            @Value("${app.frontend.url:http://localhost:3000}") String frontendUrl) {
         SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
         handler.setDefaultTargetUrl(frontendUrl + "/auth/callback");
         return handler; 

@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import devPilot.backend.ai.chat.ChatModelRouter;
 import devPilot.backend.dto.ChatMessageResponse;
 import devPilot.backend.dto.CitationDto;
 import devPilot.backend.entity.ChatMessage;
@@ -18,16 +19,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Generation step: call OpenAI via Spring AI and stream tokens to the browser over SSE.
+ * Generation step: call the active LLM via ChatModelRouter and stream tokens to the browser over SSE.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ChatStreamHandler {
 
-    private final ChatModel chatModel;
+    private final ChatModelRouter chatModelRouter;
     private final ChatMessageRepository chatMessageRepository;
     private final CitationMapper citationMapper;
+    private final ObjectMapper objectMapper;
 
     public SseEmitter stream(
             UUID sessionId,
@@ -42,9 +44,9 @@ public class ChatStreamHandler {
         try {
             emitter.send(SseEmitter.event()
                     .name("user_message")
-                    .data(savedUserMessage));
+                    .data(toJson(savedUserMessage)));
 
-            ChatClient.builder(chatModel)
+            ChatClient.builder(chatModelRouter.getModel())
                     .build()
                     .prompt()
                     .system(systemPrompt)
@@ -53,13 +55,26 @@ public class ChatStreamHandler {
                     .content()
                     .doOnNext(token -> appendToken(emitter, fullReply, token))
                     .doOnError(err -> {
-                        log.error("Chat stream error", err);
+                        log.error("Chat stream error for session {}", sessionId, err);
+                        try {
+                            emitter.send(SseEmitter.event()
+                                    .name("error")
+                                    .data(toJson(err.getMessage() != null ? err.getMessage() : "AI response error")));
+                        } catch (Exception ignored) {
+                        }
                         emitter.completeWithError(err);
                     })
                     .doOnComplete(() -> completeStream(
                             emitter, sessionId, fullReply, citations))
                     .subscribe();
         } catch (Exception ex) {
+            log.error("Error initializing chat stream for session {}", sessionId, ex);
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("error")
+                        .data(toJson(ex.getMessage() != null ? ex.getMessage() : "Failed to start chat stream")));
+            } catch (Exception ignored) {
+            }
             emitter.completeWithError(ex);
         }
 
@@ -71,7 +86,7 @@ public class ChatStreamHandler {
         try {
             emitter.send(SseEmitter.event()
                     .name("token")
-                    .data(token, MediaType.APPLICATION_JSON));
+                    .data(toJson(token)));
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -92,11 +107,20 @@ public class ChatStreamHandler {
 
             emitter.send(SseEmitter.event()
                     .name("assistant_message")
-                    .data(toMessageResponse(assistant)));
+                    .data(toJson(toMessageResponse(assistant))));
             emitter.send(SseEmitter.event().name("done").data("[DONE]"));
             emitter.complete();
         } catch (Exception ex) {
             emitter.completeWithError(ex);
+        }
+    }
+
+    private String toJson(Object obj) {
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            log.warn("Failed to serialize SSE payload to JSON", e);
+            return String.valueOf(obj);
         }
     }
 

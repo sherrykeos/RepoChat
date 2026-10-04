@@ -3,13 +3,7 @@ package devPilot.backend.services.ai;
 import org.springframework.stereotype.Component;
 
 /**
- * Builds the prompts sent to OpenAI.
- *
- * <p>We use two messages:
- * <ul>
- *   <li><b>System</b> — rules for how the assistant should behave</li>
- *   <li><b>User</b> — retrieved code context + the actual question</li>
- * </ul>
+ * Builds the prompts sent to the LLM.
  */
 @Component
 public class ChatPromptBuilder {

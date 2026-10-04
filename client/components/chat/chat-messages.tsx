@@ -46,10 +46,14 @@ export function ChatMessages({
     );
   }
 
+  const uniqueMessages = messages.filter(
+    (msg, index, self) => index === self.findIndex((m) => m.id === msg.id)
+  );
+
   return (
     <ScrollArea className="flex-1">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-6">
-        {messages.length === 0 && !streamText && (
+        {uniqueMessages.length === 0 && !streamText && (
           <div className="rounded-2xl border border-dashed bg-muted/30 px-6 py-10 text-center">
             <p className="font-medium">Ask anything about this codebase</p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -60,7 +64,7 @@ export function ChatMessages({
         )}
 
         <MessageGroup>
-          {messages.map((message) => {
+          {uniqueMessages.map((message) => {
             const isUser = message.role === "USER";
             return (
               <Message key={message.id} align={isUser ? "end" : "start"}>

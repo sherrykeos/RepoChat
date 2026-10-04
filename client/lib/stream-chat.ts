@@ -77,6 +77,15 @@ export async function streamChatMessage(
           handlers.onUserMessage?.(JSON.parse(data) as ChatMessage);
         } else if (event === "assistant_message") {
           handlers.onAssistantMessage?.(JSON.parse(data) as ChatMessage);
+        } else if (event === "error") {
+          let errText = data;
+          try {
+            const parsed = JSON.parse(data);
+            errText = typeof parsed === "string" ? parsed : parsed.message || data;
+          } catch {
+            // keep raw data
+          }
+          throw new Error(errText);
         } else if (event === "done") {
           handlers.onDone?.();
         }

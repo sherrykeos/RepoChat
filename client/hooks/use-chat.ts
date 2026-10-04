@@ -86,10 +86,12 @@ export function useStreamChat(sessionId: string | null) {
           onUserMessage: (message) => {
             queryClient.setQueryData<ChatMessage[]>(
               queryKeys.chat.messages(sessionId),
-              (prev) => [
-                ...(prev ?? []).filter((m) => m.id !== optimisticId),
-                message,
-              ]
+              (prev) => {
+                const filtered = (prev ?? []).filter(
+                  (m) => m.id !== optimisticId && m.id !== message.id
+                );
+                return [...filtered, message];
+              }
             );
           },
           onToken: (token) => {
@@ -98,7 +100,10 @@ export function useStreamChat(sessionId: string | null) {
           onAssistantMessage: (message) => {
             queryClient.setQueryData<ChatMessage[]>(
               queryKeys.chat.messages(sessionId),
-              (prev) => [...(prev ?? []), message]
+              (prev) => {
+                const filtered = (prev ?? []).filter((m) => m.id !== message.id);
+                return [...filtered, message];
+              }
             );
             setStreamText("");
           },

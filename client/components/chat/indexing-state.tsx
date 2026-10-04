@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Loader2, RotateCcw } from "lucide-react";
+import { AlertCircle, Loader2, RotateCcw, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,33 @@ export function IndexingState({
   const indexStatus = status?.indexStatus ?? repo.indexStatus;
   const errorMessage = status?.errorMessage ?? repo.errorMessage;
 
+  if (indexStatus === "PENDING") {
+    return (
+      <Empty className="h-full border-0">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Sparkles className="text-primary" />
+          </EmptyMedia>
+          <EmptyTitle>Index {repo.fullName}</EmptyTitle>
+          <EmptyDescription>
+            This repository has not been indexed yet. Start indexing to build code embeddings and unlock AI chat.
+          </EmptyDescription>
+        </EmptyHeader>
+        <Button
+          onClick={() => indexMutation.mutate(repo.id)}
+          disabled={indexMutation.isPending}
+        >
+          {indexMutation.isPending ? (
+            <Loader2 className="animate-spin" data-icon="inline-start" />
+          ) : (
+            <Sparkles data-icon="inline-start" />
+          )}
+          {indexMutation.isPending ? "Starting indexing…" : "Start indexing"}
+        </Button>
+      </Empty>
+    );
+  }
+
   if (indexStatus === "FAILED") {
     return (
       <Empty className="h-full border-0">
@@ -45,8 +72,12 @@ export function IndexingState({
           onClick={() => indexMutation.mutate(repo.id)}
           disabled={indexMutation.isPending}
         >
-          <RotateCcw data-icon="inline-start" />
-          Retry indexing
+          {indexMutation.isPending ? (
+            <Loader2 className="animate-spin" data-icon="inline-start" />
+          ) : (
+            <RotateCcw data-icon="inline-start" />
+          )}
+          {indexMutation.isPending ? "Starting indexing…" : "Retry indexing"}
         </Button>
       </Empty>
     );

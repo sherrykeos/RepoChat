@@ -48,10 +48,6 @@ public class IndexingService {
         Repository repo = repositoryRepository.findByIdAndUserId(repoId, userId)
                 .orElseThrow(() -> new NotFoundException("Repository not found"));
 
-        if (repo.getIndexStatus() == IndexStatus.INDEXING) {
-            throw new BadRequestException("Repository is already being indexed");
-        }
-
         repo.setIndexStatus(IndexStatus.INDEXING);
         repo.setFilesProcessed(0);
         repo.setFilesTotal(0);

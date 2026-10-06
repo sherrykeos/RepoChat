@@ -32,7 +32,7 @@ export function SettingsDashboard() {
         <CardHeader>
           <CardTitle>Profile</CardTitle>
           <CardDescription>
-            Your GitHub account connected to DevPilot.
+            Your GitHub account connected to RepoChat.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -43,7 +43,7 @@ export function SettingsDashboard() {
                 alt={user?.displayName}
               />
               <AvatarFallback className="rounded-xl">
-                {(user?.displayName ?? "DP").slice(0, 2).toUpperCase()}
+                {(user?.displayName ?? "RC").slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
@@ -80,7 +80,7 @@ export function SettingsDashboard() {
         <CardHeader>
           <CardTitle>Appearance</CardTitle>
           <CardDescription>
-            Customize how DevPilot looks on your device.
+            Customize how RepoChat looks on your device.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -1,6 +1,6 @@
 # AI Provider Architecture
 
-DevPilot uses a decoupled, provider-independent model routing architecture for all AI operations.
+RepoChat uses a decoupled, provider-independent model routing architecture for all AI operations.
 
 ## Core Design Principles
 

@@ -1,6 +1,5 @@
 package repochat.backend.ai.chat.provider;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.google.genai.GoogleGenAiChatModel;
 import org.springframework.stereotype.Component;

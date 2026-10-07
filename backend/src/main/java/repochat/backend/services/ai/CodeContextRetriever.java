@@ -19,7 +19,8 @@ public class CodeContextRetriever {
     private final VectorStore vectorStore;
     private final CitationMapper citationMapper; 
 
-     public RetrievedContext retrieve(UUID repositoryId, String question) {
+    @SuppressWarnings("null")
+    public RetrievedContext retrieve(UUID repositoryId, String question) {
         var filter = new FilterExpressionBuilder()
                 .eq(RagSettings.METADATA_REPO_ID, repositoryId.toString())
                 .build();

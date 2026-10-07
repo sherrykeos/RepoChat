@@ -15,7 +15,6 @@ import org.springframework.scheduling.annotation.Async;
 
 import repochat.backend.entity.IndexStatus;
 import repochat.backend.entity.Repository;
-import repochat.backend.exceptions.BadRequestException;
 import repochat.backend.exceptions.NotFoundException;
 import repochat.backend.repository.RepositoryRepository;
 import repochat.backend.services.UserService;

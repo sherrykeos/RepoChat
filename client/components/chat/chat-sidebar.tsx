@@ -1,19 +1,18 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
-import { Plus, RotateCcw } from "lucide-react";
+import { useMemo } from "react";
+import { formatDistanceToNow, isToday, isYesterday } from "date-fns";
+import { MessageSquare, Plus, RotateCcw } from "lucide-react";
 
-import { IndexStatusBadge } from "@/components/dashboard/repo-status";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useChatSessions,
   useCreateChatSession,
 } from "@/hooks/use-chat";
 import { useStartIndexing } from "@/hooks/use-repos";
-import type { Repository } from "@/lib/api";
+import type { ChatSession, Repository } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function ChatSidebar({
@@ -30,87 +29,150 @@ export function ChatSidebar({
   const createSession = useCreateChatSession(repo.id);
   const reindex = useStartIndexing();
 
-  return (
-    <aside className="flex w-full flex-col border-b md:w-72 md:border-r md:border-b-0">
-      <div className="space-y-3 p-4">
-        <div className="space-y-1">
-          <p className="truncate text-sm font-medium">{repo.fullName}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <IndexStatusBadge status={repo.indexStatus} />
-            {repo.isPrivate && (
-              <span className="text-xs text-muted-foreground">Private</span>
-            )}
-          </div>
-        </div>
+  const sessions: ChatSession[] = sessionsQuery.data ?? [];
 
-        <div className="flex gap-2">
+  // Group real sessions by Today, Yesterday, Earlier
+  const grouped = useMemo(() => {
+    const today: ChatSession[] = [];
+    const yesterday: ChatSession[] = [];
+    const earlier: ChatSession[] = [];
+
+    sessions.forEach((s) => {
+      const date = new Date(s.createdAt);
+      if (isToday(date)) today.push(s);
+      else if (isYesterday(date)) yesterday.push(s);
+      else earlier.push(s);
+    });
+
+    return { today, yesterday, earlier };
+  }, [sessions]);
+
+  return (
+    <aside className="flex w-full flex-col border-b border-border bg-card/40 md:w-64 md:border-r md:border-b-0 shrink-0">
+      <div className="p-3.5 space-y-3 border-b border-border">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-xs font-semibold text-foreground">
+            Conversations
+          </h2>
           <Button
             size="sm"
-            className="flex-1"
-            disabled={!ready || createSession.isPending}
-            onClick={() =>
-              createSession.mutate("New chat", {
-                onSuccess: (session) => onSelectSession(session.id),
-              })
-            }
-          >
-            <Plus data-icon="inline-start" />
-            New chat
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
+            variant="ghost"
+            className="size-7 p-0"
             disabled={reindex.isPending || repo.indexStatus === "INDEXING"}
             onClick={() => reindex.mutate(repo.id)}
-            aria-label="Re-index repository"
+            title="Re-index repo"
           >
-            <RotateCcw />
+            <RotateCcw className="size-3 text-muted-foreground" />
           </Button>
         </div>
+
+        {/* + New Chat Button */}
+        <Button
+          size="sm"
+          className="w-full justify-center gap-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 border border-primary/20 font-semibold text-xs h-8"
+          disabled={!ready || createSession.isPending}
+          onClick={() =>
+            createSession.mutate(undefined, {
+              onSuccess: (session) => onSelectSession(session.id),
+            })
+          }
+        >
+          <Plus className="size-3.5" />
+          New Chat
+        </Button>
       </div>
 
-      <Separator />
-
-      <div className="px-4 py-2 text-xs font-medium text-muted-foreground">
-        Sessions
-      </div>
-
-      <ScrollArea className="flex-1">
-        <div className="space-y-1 px-2 pb-4">
-          {!ready && (
-            <p className="px-2 text-xs text-muted-foreground">
-              Sessions unlock after indexing completes.
-            </p>
+      <ScrollArea className="flex-1 p-2">
+        <div className="space-y-4">
+          {sessionsQuery.isLoading && (
+            <div className="space-y-1.5 p-2">
+              <Skeleton className="h-8 rounded-lg" />
+              <Skeleton className="h-8 rounded-lg" />
+            </div>
           )}
 
-          {sessionsQuery.isLoading &&
-            Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 rounded-xl" />
-            ))}
+          {!ready && (
+            <div className="p-3 text-center text-xs text-muted-foreground">
+              Conversations unlock once repository indexing completes.
+            </div>
+          )}
 
-          {sessionsQuery.data?.map((session) => (
-            <button
-              key={session.id}
-              type="button"
-              onClick={() => onSelectSession(session.id)}
-              className={cn(
-                "w-full rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-muted",
-                sessionId === session.id && "bg-muted"
-              )}
-            >
-              <p className="truncate text-sm font-medium">{session.title}</p>
-              <p className="text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(session.createdAt), {
-                  addSuffix: true,
-                })}
-              </p>
-            </button>
-          ))}
+          {ready && sessionsQuery.isSuccess && sessions.length === 0 && (
+            <div className="p-4 text-center text-xs text-muted-foreground">
+              No conversations yet. Start a chat above to begin.
+            </div>
+          )}
 
-          {ready && sessionsQuery.isSuccess && sessionsQuery.data.length === 0 && (
-            <p className="px-2 text-xs text-muted-foreground">
-              No chats yet. Start one to begin.
-            </p>
+          {/* Today Group */}
+          {grouped.today.length > 0 && (
+            <div className="space-y-1">
+              <div className="px-2 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                Today
+              </div>
+              {grouped.today.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => onSelectSession(s.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors",
+                    sessionId === s.id
+                      ? "bg-primary/10 text-primary font-medium dark:bg-primary/15"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <MessageSquare className="size-3.5 shrink-0 opacity-70" />
+                  <span className="truncate">{s.title || "Untitled chat"}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Yesterday Group */}
+          {grouped.yesterday.length > 0 && (
+            <div className="space-y-1">
+              <div className="px-2 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                Yesterday
+              </div>
+              {grouped.yesterday.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => onSelectSession(s.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors",
+                    sessionId === s.id
+                      ? "bg-primary/10 text-primary font-medium dark:bg-primary/15"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <MessageSquare className="size-3.5 shrink-0 opacity-70" />
+                  <span className="truncate">{s.title || "Untitled chat"}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Earlier Group */}
+          {grouped.earlier.length > 0 && (
+            <div className="space-y-1">
+              <div className="px-2 text-[10px] font-semibold tracking-wider uppercase text-muted-foreground">
+                Earlier
+              </div>
+              {grouped.earlier.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => onSelectSession(s.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors",
+                    sessionId === s.id
+                      ? "bg-primary/10 text-primary font-medium dark:bg-primary/15"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <MessageSquare className="size-3.5 shrink-0 opacity-70" />
+                  <span className="truncate">{s.title || "Untitled chat"}</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </ScrollArea>

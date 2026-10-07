@@ -1,6 +1,9 @@
 import {
+  Compass,
   FolderGit2,
-  LayoutGrid,
+  Home,
+  MessageSquare,
+  Search,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -12,37 +15,38 @@ export type DashboardNavItem = {
   exact?: boolean;
 };
 
-export type DashboardNavGroup = {
-  label: string;
-  items: DashboardNavItem[];
-};
-
-export const dashboardNavGroups: DashboardNavGroup[] = [
+export const mainNavItems: DashboardNavItem[] = [
   {
-    label: "Workspace",
-    items: [
-      {
-        title: "Overview",
-        href: "/dashboard/overview",
-        icon: LayoutGrid,
-      },
-      {
-        title: "Repositories",
-        href: "/dashboard",
-        icon: FolderGit2,
-        exact: true,
-      },
-    ],
+    title: "Home",
+    href: "/",
+    icon: Home,
+    exact: true,
   },
   {
-    label: "Account",
-    items: [
-      {
-        title: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
-    ],
+    title: "Repositories",
+    href: "/dashboard",
+    icon: FolderGit2,
+    exact: true,
+  },
+  {
+    title: "Explore",
+    href: "/dashboard/explore",
+    icon: Compass,
+  },
+  {
+    title: "Chat",
+    href: "/dashboard/chat",
+    icon: MessageSquare,
+  },
+  {
+    title: "Search",
+    href: "/dashboard/search",
+    icon: Search,
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
   },
 ];
 

@@ -46,7 +46,7 @@ const LoginContent = () => {
 
   return (
    <div className="relative flex min-h-svh flex-col overflow-hidden bg-background">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(from_var(--primary)_l_c_h/0.1),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(9,105,218,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(88,166,255,0.1),rgba(13,17,23,0))]" />
 
       <header className="relative z-10 flex h-14 items-center justify-between px-4">
         <Link href="/">

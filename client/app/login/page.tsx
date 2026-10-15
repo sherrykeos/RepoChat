@@ -10,6 +10,8 @@ import { BrandMark } from "@/components/layout/app-shell";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { buttonVariants } from "@/components/ui/button";
+
+import { InteractiveGridBackground } from "@/components/landing/interactive-grid-background";
 import {
   Card,
   CardContent,
@@ -46,6 +48,15 @@ const LoginContent = () => {
 
   return (
    <div className="relative flex min-h-svh flex-col overflow-hidden bg-background">
+     <InteractiveGridBackground
+              opacity={0.3}             // Base grid opacity (0.0 to 1.0)
+              hoverOpacity={0.1}        // Spotlight glow brightness on hover (0.0 to 1.0)
+              hoverRadius={190}         // Spotlight radius in pixels (default: 260px)
+              hoverScale={1.05}         // Magnification zoom under cursor (1.05 = 5% scaleup)
+              hoverColorLight="#2563eb" // Glowing line color in Light mode
+              hoverColorDark="#38bdf8"  // Glowing line color in Dark mode (e.g. #38bdf8 cyan, #818cf8 indigo, #34d399 emerald)
+              gridSize={40}             // Grid cell size in px (default: 48px / 3rem)
+            />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(9,105,218,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(88,166,255,0.1),rgba(13,17,23,0))]" />
 
       <header className="relative z-10 flex h-14 items-center justify-between px-4">
@@ -91,6 +102,15 @@ const LoginContent = () => {
           </CardContent>
         </Card>
       </main>
+    
+          {/* Massive Typographic Wordmark Base (COSMOS Inspired, Clean & Elegant) */}
+      <div className="relative w-full overflow-hidden select-none pointer-events-none pt-2">
+        <div className="flex items-baseline justify-center w-full px-2 z-0">
+          <span className="font-heading text-[15.5vw] font-black uppercase tracking-[-0.04em] text-slate-200/90 dark:text-slate-800/30 leading-[0.76] block text-center transition-all animate-wordmark-breath">
+            REPOCHAT
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

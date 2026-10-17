@@ -53,10 +53,13 @@ export function AppShell({
   const displayName = user?.displayName || user?.githubUsername || "Developer";
   const initials = displayName.slice(0, 2).toUpperCase();
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  }
 
   // Global Ctrl+K / Cmd+K shortcut for search
   useEffect(() => {
@@ -73,15 +76,16 @@ export function AppShell({
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (searchQuery.trim()) {
+      setMobileMenuOpen(false);
       router.push(`/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
   return (
-    <div className="h-screen max-h-screen flex flex-col bg-background text-foreground overflow-hidden">
+    <div className="h-[100dvh] max-h-[100dvh] flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-md supports-backdrop-filter:bg-background/80">
-        <div className="flex h-15 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex h-15 w-full items-center justify-between px-3 sm:px-6 lg:px-8">
           {/* Left section: Brand & Nav Links */}
           <div className="flex items-center gap-6">
             <Link
@@ -295,6 +299,7 @@ export function AppShell({
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
                     className={cn(
                       "flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors",
                       active

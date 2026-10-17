@@ -118,19 +118,19 @@ export function IndexingState({
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-y-auto bg-background p-6 sm:p-8">
+    <div className="flex h-full w-full flex-col overflow-y-auto bg-background p-4 sm:p-6 md:p-8">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
-        <div>
+        <div className="min-w-0">
           <div className="text-[11px] font-semibold text-primary uppercase tracking-wider">
             Indexing Repository
           </div>
-          <h2 className="font-heading text-xl font-bold text-foreground flex items-center gap-2 mt-0.5">
-            <GitHubIcon className="size-4.5" />
-            <span>{repo.fullName}</span>
+          <h2 className="font-heading text-xl font-bold text-foreground flex items-center gap-2 mt-0.5 min-w-0">
+            <GitHubIcon className="size-4.5 shrink-0" />
+            <span className="truncate">{repo.fullName}</span>
           </h2>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
             <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
             <span>Indexing in progress</span>

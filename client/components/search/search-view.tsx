@@ -23,7 +23,7 @@ export function SearchView({ initialQuery = "" }: { initialQuery?: string }) {
   const hasSearched = query.trim().length > 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col p-6 sm:p-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col p-3.5 sm:p-6 md:p-8">
       {/* Top Header */}
       <div>
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">

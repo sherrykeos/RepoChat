@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -16,6 +16,7 @@ import {
   Network,
   Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Sparkles,
 } from "lucide-react";
@@ -338,7 +339,156 @@ export function ExploreWorkspace() {
   );
   const [fileSearch, setFileSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"graph" | "tree">("graph");
+  const [mobileTab, setMobileTab] = useState<"tree" | "graph" | "details">("tree");
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const touchRef = useRef<{
+    startX: number;
+    startY: number;
+    initialPanX: number;
+    initialPanY: number;
+    initialDistance?: number;
+    initialZoom?: number;
+  } | null>(null);
+  const mouseRef = useRef<{
+    startX: number;
+    startY: number;
+    initialPanX: number;
+    initialPanY: number;
+  } | null>(null);
+  const isMouseDownRef = useRef(false);
+  const hasMovedRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 640) {
+      setZoomLevel(0.55);
+    }
+  }, []);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    hasMovedRef.current = false;
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      touchRef.current = {
+        startX: touch.clientX,
+        startY: touch.clientY,
+        initialPanX: panOffset.x,
+        initialPanY: panOffset.y,
+      };
+      setIsDragging(true);
+    } else if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const dist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+      touchRef.current = {
+        startX: (touch1.clientX + touch2.clientX) / 2,
+        startY: (touch1.clientY + touch2.clientY) / 2,
+        initialPanX: panOffset.x,
+        initialPanY: panOffset.y,
+        initialDistance: dist,
+        initialZoom: zoomLevel,
+      };
+      setIsDragging(true);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!touchRef.current) return;
+    if (e.touches.length === 1 && !touchRef.current.initialDistance) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchRef.current.startX;
+      const dy = touch.clientY - touchRef.current.startY;
+      if (Math.hypot(dx, dy) > 5) {
+        hasMovedRef.current = true;
+      }
+      setPanOffset({
+        x: Math.round(touchRef.current.initialPanX + dx),
+        y: Math.round(touchRef.current.initialPanY + dy),
+      });
+    } else if (e.touches.length === 2 && touchRef.current.initialDistance && touchRef.current.initialZoom) {
+      hasMovedRef.current = true;
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const dist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+      const scale = dist / touchRef.current.initialDistance;
+      const newZoom = Math.min(2.0, Math.max(0.4, Number((touchRef.current.initialZoom * scale).toFixed(2))));
+      setZoomLevel(newZoom);
+
+      const midX = (touch1.clientX + touch2.clientX) / 2;
+      const midY = (touch1.clientY + touch2.clientY) / 2;
+      const dx = midX - touchRef.current.startX;
+      const dy = midY - touchRef.current.startY;
+      setPanOffset({
+        x: Math.round(touchRef.current.initialPanX + dx),
+        y: Math.round(touchRef.current.initialPanY + dy),
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchRef.current = null;
+    setIsDragging(false);
+    setTimeout(() => {
+      hasMovedRef.current = false;
+    }, 50);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement).closest("button, a")) return;
+    isMouseDownRef.current = true;
+    hasMovedRef.current = false;
+    mouseRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialPanX: panOffset.x,
+      initialPanY: panOffset.y,
+    };
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isMouseDownRef.current || !mouseRef.current) return;
+    const dx = e.clientX - mouseRef.current.startX;
+    const dy = e.clientY - mouseRef.current.startY;
+    if (Math.hypot(dx, dy) > 5) {
+      hasMovedRef.current = true;
+    }
+    setPanOffset({
+      x: Math.round(mouseRef.current.initialPanX + dx),
+      y: Math.round(mouseRef.current.initialPanY + dy),
+    });
+  };
+
+  const handleMouseUp = () => {
+    isMouseDownRef.current = false;
+    mouseRef.current = null;
+    setIsDragging(false);
+    setTimeout(() => {
+      hasMovedRef.current = false;
+    }, 50);
+  };
+
+  const handleFitToView = () => {
+    if (canvasContainerRef.current) {
+      const containerWidth = canvasContainerRef.current.clientWidth;
+      const containerHeight = canvasContainerRef.current.clientHeight;
+      const scaleX = (containerWidth - 28) / 800;
+      const scaleY = (containerHeight - 28) / 440;
+      const fitZoom = Math.min(1.0, Math.max(0.4, Number(Math.min(scaleX, scaleY).toFixed(2))));
+      setZoomLevel(fitZoom);
+    } else {
+      setZoomLevel(0.55);
+    }
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  const handleReset = () => {
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
     src: true,
     "src/agent": true,
@@ -582,8 +732,51 @@ export function ExploreWorkspace() {
       ) : (
         /* Indexed 3 Floated Panels Workspace (Left File Tree | Center Graph Canvas | Right File Details) with slight gap */
         <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-1.5 sm:gap-2 overflow-hidden">
+          {/* Mobile Tab Switcher */}
+          <div className="flex md:hidden items-center rounded-lg border border-border bg-card p-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => setMobileTab("tree")}
+              className={cn(
+                "flex-1 py-1.5 text-xs font-medium rounded-md transition-all text-center",
+                mobileTab === "tree"
+                  ? "bg-muted text-foreground font-semibold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Files
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileTab("graph")}
+              className={cn(
+                "flex-1 py-1.5 text-xs font-medium rounded-md transition-all text-center",
+                mobileTab === "graph"
+                  ? "bg-muted text-foreground font-semibold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Topology
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileTab("details")}
+              className={cn(
+                "flex-1 py-1.5 text-xs font-medium rounded-md transition-all text-center",
+                mobileTab === "details"
+                  ? "bg-muted text-foreground font-semibold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Details
+            </button>
+          </div>
+
           {/* Panel 1 (Left Floated Bar): File Tree & Header with Repo Selector */}
-          <aside className="w-full md:w-64 xl:w-72 flex flex-col rounded-xl border border-border bg-card shadow-sm shrink-0 select-none overflow-hidden text-card-foreground">
+          <aside className={cn(
+            "w-full md:w-64 xl:w-72 flex flex-col rounded-xl border border-border bg-card shadow-sm shrink-0 select-none overflow-hidden text-card-foreground",
+            mobileTab !== "tree" && "hidden md:flex"
+          )}>
             {/* Top Repo Selector matching Chat tab */}
             <div className="p-2.5 border-b border-border space-y-2 bg-card">
               <DropdownMenu>
@@ -756,7 +949,10 @@ export function ExploreWorkspace() {
                 return (
                   <button
                     key={node.id}
-                    onClick={() => setSelectedFilePath(node.path)}
+                    onClick={() => {
+                      setSelectedFilePath(node.path);
+                      setMobileTab("details");
+                    }}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors truncate",
                       isSelected
@@ -773,7 +969,10 @@ export function ExploreWorkspace() {
           </aside>
 
           {/* Panel 2 (Center): Interactive Relationship Graph Canvas (Floated Card) */}
-          <section className="relative flex-1 rounded-xl border border-border bg-card shadow-sm flex flex-col overflow-hidden select-none text-card-foreground">
+          <section className={cn(
+            "relative flex-1 rounded-xl border border-border bg-card shadow-sm flex flex-col overflow-hidden select-none text-card-foreground",
+            mobileTab !== "graph" && "hidden md:flex"
+          )}>
             {/* Center Header: Graph/Tree Switcher & Zoom */}
             <div className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-card px-3.5">
               <div className="flex items-center gap-2">
@@ -814,7 +1013,21 @@ export function ExploreWorkspace() {
             </div>
 
             {/* Canvas Body */}
-            <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-muted/20">
+            <div
+              ref={canvasContainerRef}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+              className={cn(
+                "relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-muted/20 select-none touch-none",
+                isDragging ? "cursor-grabbing" : "cursor-grab"
+              )}
+            >
               {/* Background subtle radial grid */}
               <div
                 className="absolute inset-0 pointer-events-none"
@@ -827,11 +1040,11 @@ export function ExploreWorkspace() {
               {/* SVG Graph Visualization */}
               <div
                 style={{
-                  transform: `scale(${zoomLevel})`,
+                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
                   transformOrigin: "center center",
-                  transition: "transform 0.15s ease-out",
+                  transition: isDragging ? "none" : "transform 0.15s ease-out",
                 }}
-                className="relative w-[800px] h-[440px]"
+                className="relative w-[800px] h-[440px] shrink-0 pointer-events-auto"
               >
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
                   {graphNodes.slice(1).map((node) => (
@@ -861,12 +1074,13 @@ export function ExploreWorkspace() {
                         transform: "translate(-50%, -50%)",
                       }}
                       onClick={() => {
+                        if (hasMovedRef.current) return;
                         if (!isCenter) {
                           setSelectedFilePath(node.name);
                         }
                       }}
                       className={cn(
-                        "absolute flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-all duration-150 cursor-pointer shadow-sm",
+                        "absolute flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-all duration-150 cursor-pointer shadow-sm select-none",
                         isCenter
                           ? "bg-[#0969da] dark:bg-[#1f6feb] border-primary text-white font-bold z-20 scale-110 shadow-md"
                           : isFolder
@@ -887,8 +1101,8 @@ export function ExploreWorkspace() {
                 })}
               </div>
 
-              {/* Bottom-Left Legend */}
-              <div className="absolute bottom-4 left-4 flex items-center gap-3 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-[11px] text-muted-foreground backdrop-blur-md shadow-sm">
+              {/* Legend - Positioned top-3 left-3 on mobile to avoid overlapping with bottom zoom controls, and bottom-4 left-4 on desktop */}
+              <div className="absolute top-3 left-3 sm:top-auto sm:bottom-4 sm:left-4 z-20 flex flex-wrap items-center gap-2 sm:gap-3 rounded-lg border border-border bg-card/90 px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-[10px] sm:text-[11px] text-muted-foreground backdrop-blur-md shadow-sm pointer-events-none">
                 <div className="flex items-center gap-1.5">
                   <span className="size-2 rounded-full bg-primary" />
                   <span>File</span>
@@ -901,52 +1115,73 @@ export function ExploreWorkspace() {
                   <span className="size-2 rounded-full bg-emerald-500" />
                   <span>External</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="hidden xs:flex items-center gap-1.5">
                   <span className="w-3 h-0.5 bg-border" />
                   <span>Relationship</span>
                 </div>
               </div>
 
-              {/* Bottom-Right Zoom Controls */}
-              <div className="absolute bottom-4 right-4 flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm">
+              {/* Mobile touch gesture badge */}
+              <div className="absolute bottom-3 left-3 sm:hidden z-20 flex items-center gap-1 rounded-md border border-border/60 bg-card/85 px-2 py-1 text-[9px] text-muted-foreground backdrop-blur-sm pointer-events-none">
+                <span>Drag to pan • Pinch to zoom</span>
+              </div>
+
+              {/* Bottom-Right Zoom & Adjust Controls */}
+              <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex items-center gap-1 rounded-xl border border-border bg-card/95 p-1 shadow-lg backdrop-blur-md">
                 <button
                   type="button"
-                  onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.1))}
-                  className="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                  onClick={() => setZoomLevel((z) => Math.max(0.4, Number((z - 0.1).toFixed(2))))}
+                  className="flex size-8 sm:size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all"
                   title="Zoom Out"
+                  aria-label="Zoom Out"
                 >
                   <Minus className="size-3.5" />
                 </button>
                 <button
                   type="button"
-                  onClick={() => setZoomLevel(1)}
-                  className="px-2 text-xs font-mono text-muted-foreground hover:bg-muted hover:text-foreground rounded py-1"
-                  title="Reset Zoom"
+                  onClick={handleReset}
+                  className="px-2 py-1 text-[11px] sm:text-xs font-mono font-medium text-muted-foreground hover:bg-muted hover:text-foreground rounded-lg transition-all"
+                  title="Reset View (100%)"
                 >
                   {Math.round(zoomLevel * 100)}%
                 </button>
                 <button
                   type="button"
-                  onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
-                  className="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                  onClick={() => setZoomLevel((z) => Math.min(2.0, Number((z + 0.1).toFixed(2))))}
+                  className="flex size-8 sm:size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all"
                   title="Zoom In"
+                  aria-label="Zoom In"
                 >
                   <Plus className="size-3.5" />
                 </button>
+                <div className="h-4 w-px bg-border mx-0.5" />
                 <button
                   type="button"
-                  onClick={() => setZoomLevel(1)}
-                  className="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-                  title="Fit to View"
+                  onClick={handleFitToView}
+                  className="flex size-8 sm:size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all"
+                  title="Fit to Screen"
+                  aria-label="Fit to Screen"
                 >
-                  <Maximize2 className="size-3" />
+                  <Maximize2 className="size-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPanOffset({ x: 0, y: 0 })}
+                  className="flex size-8 sm:size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 transition-all"
+                  title="Center Canvas"
+                  aria-label="Center Canvas"
+                >
+                  <RotateCcw className="size-3.5" />
                 </button>
               </div>
             </div>
           </section>
 
           {/* Panel 3 (Right Floated Bar): File Details Panel */}
-          <aside className="w-full md:w-64 xl:w-72 flex flex-col rounded-xl border border-border bg-card shadow-sm shrink-0 p-3.5 space-y-4 select-none overflow-y-auto text-card-foreground">
+          <aside className={cn(
+            "w-full md:w-64 xl:w-72 flex flex-col rounded-xl border border-border bg-card shadow-sm shrink-0 p-3.5 space-y-4 select-none overflow-y-auto text-card-foreground",
+            mobileTab !== "details" && "hidden md:flex"
+          )}>
             <h3 className="font-heading text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               File Details
             </h3>

@@ -591,7 +591,7 @@ export function FeaturesSection() {
                   {/* SINGLE CARD (width ~48% on desktop, 45% in row 5 for chat spacing) */}
                   <div
                     className={cn(
-                      "relative w-full rounded-2xl border p-5 sm:p-6 backdrop-blur-md transition-all duration-500",
+                      "relative w-full rounded-2xl border p-4 sm:p-6 backdrop-blur-md transition-all duration-500",
                       idx === 4 ? "md:w-[45%]" : "md:w-[48%]",
                       isConnected
                         ? "border-blue-500/80 bg-white/95 shadow-[0_12px_32px_-4px_rgba(59,130,246,0.16)] ring-1 ring-blue-500/25 dark:border-blue-400/80 dark:bg-slate-900/95 scale-[1.01]"
@@ -659,7 +659,7 @@ export function FeaturesSection() {
 
                     {/* Card Header */}
                     <div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <div
                             className={cn(

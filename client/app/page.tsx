@@ -214,14 +214,14 @@ export default function HomePage() {
         {/* Centered Hero Header */}
         <div className="flex flex-col items-center text-center">
           {/* Top Announcement Pill Badge with Shimmer Sweep */}
-          <div className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-slate-300/90 bg-white/90 px-4 py-1.5 text-xs font-medium text-slate-700 shadow-2xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300 dark:hover:border-blue-700 animate-fade-in-up">
+          <div className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-slate-300/90 bg-white/90 px-3 py-1.5 sm:px-4 text-[11px] sm:text-xs font-medium text-slate-700 shadow-2xs backdrop-blur-md transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300 dark:hover:border-blue-700 animate-fade-in-up max-w-full">
             <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-blue-500/15 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
-            <Sparkles className="size-3.5 text-blue-500 animate-pulse" />
-            <span>Turn any Github Repository into a Conversation</span>
+            <Sparkles className="size-3.5 text-blue-500 shrink-0 animate-pulse" />
+            <span className="truncate sm:overflow-visible">Turn any Github Repository into a Conversation</span>
           </div>
 
           {/* Main Headline with Animated Gradient Flow */}
-          <h1 className="mt-7 font-heading text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.12] animate-fade-in-up [animation-duration:800ms] [animation-delay:150ms]">
+          <h1 className="mt-7 font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.12] animate-fade-in-up [animation-duration:800ms] [animation-delay:150ms]">
             Your codebase, <br />
             <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-500 dark:from-blue-400 dark:via-indigo-300 dark:to-cyan-400 bg-[length:200%_auto] animate-gradient-text bg-clip-text text-transparent inline-block">
               now speaks.
@@ -229,18 +229,18 @@ export default function HomePage() {
           </h1>
 
           {/* Supporting Subtext */}
-          <p className="mt-4 max-w-2xl text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed animate-fade-in-up [animation-duration:800ms] [animation-delay:300ms]">
+          <p className="mt-4 max-w-2xl text-sm sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed animate-fade-in-up [animation-duration:800ms] [animation-delay:300ms]">
             RepoChat helps you understand, explore, and navigate any GitHub repository
             using AI. Ask questions, find code, and get clear answers with references
             to the actual source files.
           </p>
 
           {/* Main CTA with Button Hover & Micro-interactions */}
-          <div className="mt-8 flex flex-col items-center animate-fade-in-up [animation-duration:800ms] [animation-delay:450ms]">
+          <div className="mt-8 flex flex-col items-center w-full sm:w-auto animate-fade-in-up [animation-duration:800ms] [animation-delay:450ms]">
             {user ? (
               <Link
                 href="/dashboard"
-                className="group/btn relative inline-flex items-center gap-2.5 rounded-xl bg-[#0f172a] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-[#1e293b] hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] hover:scale-[1.02] active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 cursor-pointer"
+                className="group/btn relative inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#0f172a] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-[#1e293b] hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] hover:scale-[1.02] active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 cursor-pointer w-full sm:w-auto"
               >
                 <LayoutDashboard className="size-4 text-blue-400 dark:text-blue-600 transition-transform duration-300 group-hover/btn:rotate-12" />
                 <span>Go to Dashboard</span>
@@ -249,7 +249,7 @@ export default function HomePage() {
             ) : (
               <a
                 href={getGithubLoginUrl()}
-                className="group/btn relative inline-flex items-center gap-2.5 rounded-xl bg-[#0f172a] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-[#1e293b] hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] hover:scale-[1.02] active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 cursor-pointer"
+                className="group/btn relative inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#0f172a] px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:bg-[#1e293b] hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] hover:scale-[1.02] active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 cursor-pointer w-full sm:w-auto"
               >
                 <GitHubIcon className="size-4 transition-transform duration-300 group-hover/btn:scale-110" />
                 <span>Continue with GitHub</span>
@@ -332,7 +332,7 @@ export default function HomePage() {
       <main className="relative w-full isolate z-0">
         {/* Interactive Blueprint Grid with Cursor Glow & Subtle Magnification */}
         <InteractiveGridBackground
-          opacity={0.3}             // Base grid opacity (0.0 to 1.0)
+          opacity={0.2}             // Base grid opacity (0.0 to 1.0)
           hoverOpacity={0.1}        // Spotlight glow brightness on hover (0.0 to 1.0)
           hoverRadius={190}         // Spotlight radius in pixels (default: 260px)
           hoverScale={1.05}         // Magnification zoom under cursor (1.05 = 5% scaleup)

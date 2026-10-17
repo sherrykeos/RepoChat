@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   AlertCircle,
   ChevronDown,
@@ -32,16 +33,27 @@ type FilterStatus = "ALL" | IndexStatus | "NOT_INDEXED";
 export type RepoScope = "all" | "native" | "other";
 
 export function RepoDashboard() {
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get("status") as FilterStatus | null;
+  const langParam = searchParams.get("language");
+  const scopeParam = searchParams.get("scope") as RepoScope | null;
+
   const { data: user } = useCurrentUser();
   const reposQuery = useRepos();
   const refresh = useRefreshRepos();
 
   const [search, setSearch] = useState("");
-  const [scope, setScope] = useState<RepoScope>("all");
-  const [status, setStatus] = useState<FilterStatus>("ALL");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
+  const [scope, setScope] = useState<RepoScope>(scopeParam || "all");
+  const [status, setStatus] = useState<FilterStatus>(statusParam || "ALL");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(langParam || "All");
   const [sortOption, setSortOption] = useState<string>("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  useEffect(() => {
+    if (statusParam) setStatus(statusParam);
+    if (langParam) setSelectedLanguage(langParam);
+    if (scopeParam) setScope(scopeParam);
+  }, [statusParam, langParam, scopeParam]);
 
   const rawRepos: Repository[] = reposQuery.data ?? [];
 
@@ -298,7 +310,7 @@ export function RepoDashboard() {
         </div>
 
         {/* Controls: Language, Sort, Grid/List view toggle */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Language filter */}
           <CustomSelectDropdown
             value={selectedLanguage}

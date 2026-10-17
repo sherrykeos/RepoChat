@@ -91,18 +91,18 @@ export function RepoOverview({ repoId }: { repoId: string }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-6 sm:p-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col p-3.5 sm:p-6 md:p-8">
       {/* Breadcrumb & Action bar */}
-      <div className="flex items-center justify-between border-b border-border pb-4">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Link href="/dashboard" className="hover:text-foreground">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+          <Link href="/dashboard" className="hover:text-foreground shrink-0">
             Repositories
           </Link>
-          <ChevronRight className="size-3.5" />
-          <span className="font-medium text-foreground">{repo.fullName}</span>
+          <ChevronRight className="size-3.5 shrink-0" />
+          <span className="font-medium text-foreground truncate">{repo.fullName}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {isReady && (
             <Button
               size="sm"
@@ -165,7 +165,7 @@ export function RepoOverview({ repoId }: { repoId: string }) {
       </div>
 
       {/* Main Repository Header Card */}
-      <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-xs">
+      <div className="mt-6 rounded-xl border border-border bg-card p-4 sm:p-6 shadow-xs">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex items-start gap-4">
             <div className="flex size-12 items-center justify-center rounded-xl bg-muted border border-border">
@@ -227,10 +227,10 @@ export function RepoOverview({ repoId }: { repoId: string }) {
                     href={repo.htmlUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                    className="inline-flex items-center gap-1 text-primary hover:underline max-w-[220px] sm:max-w-none truncate"
                   >
-                    <span>{repo.htmlUrl}</span>
-                    <ExternalLink className="size-3" />
+                    <span className="truncate">{repo.htmlUrl}</span>
+                    <ExternalLink className="size-3 shrink-0" />
                   </a>
                 )}
               </div>

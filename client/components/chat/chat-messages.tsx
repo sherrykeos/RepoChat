@@ -125,6 +125,27 @@ export function ChatMessages({
     setEditValue(content);
   };
 
+  const [activeToolbarMessageId, setActiveToolbarMessageId] = useState<string | null>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTouchStart = (id: string) => {
+    handleTouchEnd();
+    longPressTimerRef.current = setTimeout(() => {
+      setActiveToolbarMessageId((prev) => (prev === id ? null : id));
+    }, 350);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleTouchMove = () => {
+    handleTouchEnd();
+  };
+
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditValue("");
@@ -156,6 +177,9 @@ export function ChatMessages({
   return (
     <div
       ref={scrollContainerRef}
+      onClick={() => {
+        if (activeToolbarMessageId) setActiveToolbarMessageId(null);
+      }}
       className="flex-1 min-h-0 h-full w-full overflow-y-auto overscroll-contain scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 min-h-full">
@@ -229,13 +253,26 @@ export function ChatMessages({
                     </div>
                   </div>
                 ) : (
-                  <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary px-4 py-2.5 text-xs sm:text-sm text-primary-foreground shadow-xs">
+                  <div
+                    onTouchStart={() => handleTouchStart(message.id)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchEnd}
+                    className="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary px-4 py-2.5 text-xs sm:text-sm text-primary-foreground shadow-xs select-none sm:select-text"
+                  >
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
                 )}
 
-                {/* User Message Action Toolbar: Visible ONLY on hover, BELOW the message */}
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 px-1 select-none">
+                {/* User Message Action Toolbar: Visible on press-and-hold on mobile, hover on desktop */}
+                <div
+                  className={cn(
+                    "flex items-center gap-1.5 transition-opacity duration-150 px-1 select-none",
+                    activeToolbarMessageId === message.id
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 sm:opacity-0 sm:group-hover:opacity-100 pointer-events-none sm:pointer-events-auto"
+                  )}
+                >
                   {/* Timestamp */}
                   <span className="text-[10px] text-muted-foreground font-mono">
                     {formatMessageTime(message.createdAt)}
@@ -296,7 +333,13 @@ export function ChatMessages({
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 space-y-2 overflow-hidden text-xs sm:text-sm leading-relaxed rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive-foreground dark:text-red-200 shadow-sm backdrop-blur-xs">
+                <div
+                  onTouchStart={() => handleTouchStart(message.id)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onTouchCancel={handleTouchEnd}
+                  className="flex-1 space-y-2 overflow-hidden text-xs sm:text-sm leading-relaxed rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-destructive-foreground dark:text-red-200 shadow-sm backdrop-blur-xs select-none sm:select-text"
+                >
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-destructive dark:text-red-400 text-xs tracking-wide uppercase">
                       AI Model Error
@@ -307,8 +350,15 @@ export function ChatMessages({
                     <ChatMarkdown content={message.content} />
                   </div>
 
-                  {/* Hover Action Bar: Visible ONLY on hover, BELOW the message */}
-                  <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pt-1 select-none">
+                  {/* Action Bar: Visible on press-and-hold on mobile, hover on desktop */}
+                  <div
+                    className={cn(
+                      "flex items-center gap-1.5 transition-opacity duration-150 pt-1 select-none",
+                      activeToolbarMessageId === message.id
+                        ? "opacity-100 pointer-events-auto"
+                        : "opacity-0 sm:opacity-0 sm:group-hover:opacity-100 pointer-events-none sm:pointer-events-auto"
+                    )}
+                  >
                     <span className="text-[10px] text-destructive/70 font-mono">
                       {formatMessageTime(message.createdAt)}
                     </span>
@@ -349,8 +399,14 @@ export function ChatMessages({
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex-1 space-y-2.5 overflow-hidden">
-                <div className="text-xs sm:text-sm leading-relaxed text-foreground">
+              <div
+                onTouchStart={() => handleTouchStart(message.id)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchEnd}
+                className="flex-1 space-y-2.5 overflow-hidden"
+              >
+                <div className="text-xs sm:text-sm leading-relaxed text-foreground select-none sm:select-text">
                   <ChatMarkdown content={message.content} />
                 </div>
 
@@ -384,8 +440,15 @@ export function ChatMessages({
                   </div>
                 )}
 
-                {/* Assistant Message Action Toolbar: Visible ONLY on hover */}
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pt-1 select-none">
+                {/* Assistant Message Action Toolbar: Visible on press-and-hold on mobile, hover on desktop */}
+                <div
+                  className={cn(
+                    "flex items-center gap-2 transition-opacity duration-150 pt-1 select-none",
+                    activeToolbarMessageId === message.id
+                      ? "opacity-100 pointer-events-auto"
+                      : "opacity-0 sm:opacity-0 sm:group-hover:opacity-100 pointer-events-none sm:pointer-events-auto"
+                  )}
+                >
                   {/* Timestamp */}
                   <span className="text-[10px] text-muted-foreground/75 font-mono">
                     {formatMessageTime(message.createdAt)}

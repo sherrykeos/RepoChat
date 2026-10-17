@@ -117,7 +117,7 @@ function HeroVisualization3D() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ perspective: "1100px", perspectiveOrigin: "center center" }}
-      className="lg:col-span-6 relative flex items-center justify-center min-h-[350px] sm:min-h-[390px] select-none"
+      className="lg:col-span-6 relative flex items-center justify-center min-h-[350px] sm:min-h-[390px] select-none overflow-hidden sm:overflow-visible"
     >
       {/* 3D Canvas Container with Smooth Parallax Tilt */}
       <div
@@ -128,7 +128,7 @@ function HeroVisualization3D() {
             ? "transform 0.08s ease-out"
             : "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)",
         }}
-        className="relative w-full h-full flex items-center justify-center"
+        className="relative w-full h-full flex items-center justify-center scale-[0.80] sm:scale-95 md:scale-100 origin-center"
       >
         {/* Layer 0: Interactive Dynamic Mouse Spotlight & Ambient Aura (Z: -20px) */}
         <div
@@ -395,7 +395,7 @@ function HeroVisualization3D() {
           {/* Holographic Status Pill Underneath */}
           <div
             style={{ transform: "translateZ(30px)" }}
-            className="absolute -bottom-9 px-3 py-1 rounded-full border border-border bg-card/95 text-[10px] text-muted-foreground group-hover:text-primary group-hover:border-primary/60 transition-all flex items-center gap-1.5 shadow-xl backdrop-blur-md whitespace-nowrap"
+            className="absolute -bottom-9 px-2.5 py-0.5 rounded-full border border-border bg-card/95 text-[7.5px] md:text-[11px] text-muted-foreground group-hover:text-primary group-hover:border-primary/60 transition-all flex items-center gap-1.5 shadow-xl backdrop-blur-md whitespace-nowrap"
           >
             <span
               className={cn(
@@ -415,23 +415,23 @@ function HeroVisualization3D() {
           className="absolute inset-0 pointer-events-none"
         >
           {/* GitHub Icon Badge */}
-          <div className="absolute top-20 left-14 sm:left-18 size-6 rounded-full border border-border bg-card/95 flex items-center justify-center text-foreground shadow-xl backdrop-blur-md animate-float-gentle">
-            <GitHubIcon className="size-3" />
+          <div className="absolute top-20 left-14 sm:left-18 size-5 rounded-full border border-border bg-card/95 flex items-center justify-center text-foreground shadow-xl backdrop-blur-md animate-float-gentle">
+            <GitHubIcon className="size-2.5" />
           </div>
 
           {/* Code Syntax </> Badge */}
-          <div className="absolute bottom-16 left-32 sm:left-36 px-2 py-0.5 rounded-md border border-border bg-card/95 text-[10px] font-mono text-primary shadow-xl backdrop-blur-md animate-float-reverse">
+          <div className="absolute bottom-16 left-32 sm:left-36 px-1.5 py-0.2 rounded-md border border-border bg-card/95 text-[7.5px] md:text-[10.5px] font-mono text-primary shadow-xl backdrop-blur-md animate-float-reverse">
             &lt;/&gt;
           </div>
 
           {/* AST / Brackets Token */}
-          <div className="absolute top-16 right-20 sm:right-24 px-2 py-0.5 rounded-md border border-border bg-card/95 text-[10px] font-mono text-[#a371f7] shadow-xl backdrop-blur-md animate-float-gentle">
+          <div className="absolute top-16 right-20 sm:right-24 px-1.5 py-0.2 rounded-md border border-border bg-card/95 text-[7.5px] md:text-[10.5px] font-mono text-[#a371f7] shadow-xl backdrop-blur-md animate-float-gentle">
             &#123; AST &#125;
           </div>
 
           {/* Git Branch Token */}
-          <div className="absolute bottom-16 right-28 sm:right-32 flex items-center gap-1 px-2 py-0.5 rounded-md border border-border bg-card/95 text-[10px] font-mono text-[#3fb950] shadow-xl backdrop-blur-md animate-float-reverse">
-            <GitBranch className="size-2.5" />
+          <div className="absolute bottom-16 right-28 sm:right-32 flex items-center gap-1 px-1.5 py-0.2 rounded-md border border-border bg-card/95 text-[7.5px] md:text-[10.5px] font-mono text-[#3fb950] shadow-xl backdrop-blur-md animate-float-reverse">
+            <GitBranch className="size-2 md:size-2.5" />
             <span>main</span>
           </div>
         </div>
@@ -452,14 +452,14 @@ function HeroVisualization3D() {
               transition: "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease",
             }}
             className={cn(
-              "absolute top-4 left-4 sm:left-8 flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
+              "absolute top-4 left-4 sm:left-8 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 md:px-3 md:py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
               activeNode === "architecture"
                 ? "border-primary bg-primary/10 text-primary shadow-[0_10px_25px_rgba(88,166,255,0.25)] font-semibold"
                 : "border-border/90 bg-card/95 text-foreground hover:border-primary/70"
             )}
           >
-            <BarChart2 className="size-3.5 text-primary group-hover/card:scale-110 transition-transform" />
-            <span className="text-[11px] font-medium">Analyze architecture</span>
+            <BarChart2 className="size-3 md:size-3.5 text-primary group-hover/card:scale-110 transition-transform" />
+            <span className="text-[7.5px] md:text-[11px] font-medium tracking-tight">Analyze architecture</span>
           </button>
 
           {/* Card 2: Trace code flow (Top-Right) */}
@@ -473,14 +473,14 @@ function HeroVisualization3D() {
               transition: "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease",
             }}
             className={cn(
-              "absolute top-4 right-4 sm:right-8 flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
+              "absolute top-4 right-4 sm:right-8 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 md:px-3 md:py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
               activeNode === "flow"
                 ? "border-[#8250df] bg-[#8250df]/10 text-[#8250df] shadow-[0_10px_25px_rgba(130,80,223,0.25)] font-semibold"
                 : "border-border/90 bg-card/95 text-foreground hover:border-[#8250df]/70"
             )}
           >
-            <Network className="size-3.5 text-[#8250df] group-hover/card:scale-110 transition-transform" />
-            <span className="text-[11px] font-medium">Trace code flow</span>
+            <Network className="size-3 md:size-3.5 text-[#8250df] group-hover/card:scale-110 transition-transform" />
+            <span className="text-[7.5px] md:text-[11px] font-medium tracking-tight">Trace code flow</span>
           </button>
 
           {/* Card 3: Ask questions about any file (Mid-Left) */}
@@ -494,14 +494,14 @@ function HeroVisualization3D() {
               transition: "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease",
             }}
             className={cn(
-              "absolute top-32 left-0 sm:left-2 flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
+              "absolute top-32 left-0 sm:left-2 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 md:px-3 md:py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
               activeNode === "questions"
                 ? "border-primary bg-primary/10 text-primary shadow-[0_10px_25px_rgba(88,166,255,0.25)] font-semibold"
                 : "border-border/90 bg-card/95 text-foreground hover:border-primary/70"
             )}
           >
-            <MessageSquare className="size-3.5 text-primary group-hover/card:scale-110 transition-transform" />
-            <span className="text-[11px] font-medium">Ask questions about any file</span>
+            <MessageSquare className="size-3 md:size-3.5 text-primary group-hover/card:scale-110 transition-transform" />
+            <span className="text-[7.5px] md:text-[11px] font-medium tracking-tight">Ask questions about any file</span>
           </button>
 
           {/* Card 4: Find implementations (Mid-Right) */}
@@ -515,14 +515,14 @@ function HeroVisualization3D() {
               transition: "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease",
             }}
             className={cn(
-              "absolute top-28 right-0 sm:right-2 flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
+              "absolute top-28 right-0 sm:right-2 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 md:px-3 md:py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
               activeNode === "implementations"
                 ? "border-primary bg-primary/10 text-primary shadow-[0_10px_25px_rgba(88,166,255,0.25)] font-semibold"
                 : "border-border/90 bg-card/95 text-foreground hover:border-primary/70"
             )}
           >
-            <Search className="size-3.5 text-primary group-hover/card:scale-110 transition-transform" />
-            <span className="text-[11px] font-medium">Find implementations</span>
+            <Search className="size-3 md:size-3.5 text-primary group-hover/card:scale-110 transition-transform" />
+            <span className="text-[7.5px] md:text-[11px] font-medium tracking-tight">Find implementations</span>
           </button>
 
           {/* Card 5: Explore relationships (Bottom-Left) */}
@@ -536,14 +536,14 @@ function HeroVisualization3D() {
               transition: "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease",
             }}
             className={cn(
-              "absolute bottom-4 left-6 sm:left-12 flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
+              "absolute bottom-4 left-6 sm:left-12 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 md:px-3 md:py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
               activeNode === "relationships"
                 ? "border-[#3fb950] bg-[#3fb950]/10 text-[#3fb950] shadow-[0_10px_25px_rgba(63,185,80,0.25)] font-semibold"
                 : "border-border/90 bg-card/95 text-foreground hover:border-[#3fb950]/70"
             )}
           >
-            <Share2 className="size-3.5 text-[#3fb950] group-hover/card:scale-110 transition-transform" />
-            <span className="text-[11px] font-medium">Explore relationships</span>
+            <Share2 className="size-3 md:size-3.5 text-[#3fb950] group-hover/card:scale-110 transition-transform" />
+            <span className="text-[7.5px] md:text-[11px] font-medium tracking-tight">Explore relationships</span>
           </button>
 
           {/* Card 6: Generate summaries (Bottom-Right) */}
@@ -557,14 +557,14 @@ function HeroVisualization3D() {
               transition: "transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s ease",
             }}
             className={cn(
-              "absolute bottom-4 right-6 sm:right-12 flex items-center gap-2 rounded-lg border px-3 py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
+              "absolute bottom-4 right-6 sm:right-12 flex items-center gap-1.5 rounded-lg border px-2.5 py-1 md:px-3 md:py-1.5 shadow-xl backdrop-blur-md cursor-pointer group/card",
               activeNode === "summaries"
                 ? "border-[#f0883e] bg-[#f0883e]/10 text-[#f0883e] shadow-[0_10px_25px_rgba(240,136,62,0.25)] font-semibold"
                 : "border-border/90 bg-card/95 text-foreground hover:border-[#f0883e]/70"
             )}
           >
-            <FileText className="size-3.5 text-[#f0883e] group-hover/card:scale-110 transition-transform" />
-            <span className="text-[11px] font-medium">Generate summaries</span>
+            <FileText className="size-3 md:size-3.5 text-[#f0883e] group-hover/card:scale-110 transition-transform" />
+            <span className="text-[7.5px] md:text-[11px] font-medium tracking-tight">Generate summaries</span>
           </button>
         </div>
       </div>
@@ -757,7 +757,7 @@ export function OverviewDashboard() {
       </section>
 
       {/* 2. Top Statistics Row (4 Cards) */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {reposQuery.isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-xl bg-muted" />
@@ -766,7 +766,7 @@ export function OverviewDashboard() {
           <>
             {/* Card 1: Total Repositories */}
             <div
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/dashboard/repo")}
               className="group flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/50 cursor-pointer shadow-xs"
             >
               <div className="flex items-center gap-3.5 min-w-0">
@@ -784,7 +784,10 @@ export function OverviewDashboard() {
             </div>
 
             {/* Card 2: Indexed */}
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-xs">
+            <div
+              onClick={() => router.push("/dashboard/repo?status=READY")}
+              className="group flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/50 cursor-pointer shadow-xs"
+            >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-[#3fb950]">
                   <CheckCircle2 className="size-5" />
@@ -796,21 +799,27 @@ export function OverviewDashboard() {
                   <div className="text-xs text-muted-foreground">Indexed</div>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-mono font-medium text-emerald-600 dark:text-[#3fb950]">
-                  {readyPct}%
-                </span>
-                <div className="w-12 h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full"
-                    style={{ width: `${readyPct}%` }}
-                  />
+              <div className="text-right flex items-center gap-2">
+                <div>
+                  <span className="text-xs font-mono font-medium text-emerald-600 dark:text-[#3fb950]">
+                    {readyPct}%
+                  </span>
+                  <div className="w-12 h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full"
+                      style={{ width: `${readyPct}%` }}
+                    />
+                  </div>
                 </div>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
 
             {/* Card 3: Indexing */}
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-xs">
+            <div
+              onClick={() => router.push("/dashboard/repo?status=INDEXING")}
+              className="group flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/50 cursor-pointer shadow-xs"
+            >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Clock className="size-5" />
@@ -822,21 +831,27 @@ export function OverviewDashboard() {
                   <div className="text-xs text-muted-foreground">Indexing</div>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-mono font-medium text-muted-foreground">
-                  {indexingPct}%
-                </span>
-                <div className="w-12 h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full"
-                    style={{ width: `${indexingPct}%` }}
-                  />
+              <div className="text-right flex items-center gap-2">
+                <div>
+                  <span className="text-xs font-mono font-medium text-muted-foreground">
+                    {indexingPct}%
+                  </span>
+                  <div className="w-12 h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${indexingPct}%` }}
+                    />
+                  </div>
                 </div>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
 
             {/* Card 4: Not Indexed */}
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-4 shadow-xs">
+            <div
+              onClick={() => router.push("/dashboard/repo?status=NOT_INDEXED")}
+              className="group flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/50 cursor-pointer shadow-xs"
+            >
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                   <Sparkles className="size-5" />
@@ -848,16 +863,19 @@ export function OverviewDashboard() {
                   <div className="text-xs text-muted-foreground">Not Indexed</div>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-xs font-mono font-medium text-muted-foreground">
-                  {notIndexedPct}%
-                </span>
-                <div className="w-12 h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
-                  <div
-                    className="h-full bg-muted-foreground/40 rounded-full"
-                    style={{ width: `${notIndexedPct}%` }}
-                  />
+              <div className="text-right flex items-center gap-2">
+                <div>
+                  <span className="text-xs font-mono font-medium text-muted-foreground">
+                    {notIndexedPct}%
+                  </span>
+                  <div className="w-12 h-1 bg-muted rounded-full mt-1.5 overflow-hidden">
+                    <div
+                      className="h-full bg-muted-foreground/40 rounded-full"
+                      style={{ width: `${notIndexedPct}%` }}
+                    />
+                  </div>
                 </div>
+                <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </div>
             </div>
           </>
@@ -882,7 +900,7 @@ export function OverviewDashboard() {
             </div>
 
             <Link
-              href="/dashboard"
+              href="/dashboard/repo"
               className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               <span>View all</span>
@@ -1201,7 +1219,11 @@ export function OverviewDashboard() {
               {/* Legend List */}
               <div className="flex-1 space-y-1.5 text-xs font-mono">
                 {languageStats.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between text-[11px]">
+                  <div
+                    key={item.name}
+                    onClick={() => router.push(`/dashboard/repo?language=${encodeURIComponent(item.name)}`)}
+                    className="flex items-center justify-between text-[11px] p-1 -mx-1 rounded-md hover:bg-muted cursor-pointer transition-colors"
+                  >
                     <div className="flex items-center gap-1.5 truncate">
                       <span
                         className="size-2 rounded-full shrink-0"

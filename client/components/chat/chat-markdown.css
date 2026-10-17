@@ -88,4 +88,24 @@
   max-width: 100%;
   height: auto;
   vertical-align: middle;
+}
+
+.chat-markdown {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.chat-markdown pre,
+.chat-markdown [data-streamdown="code-block"] {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-collapse: collapse;
 }

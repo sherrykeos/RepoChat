@@ -85,14 +85,14 @@ export function AppMockupPreview() {
         </div>
 
         {/* Center Column: Chat Stream Area */}
-        <div className="flex flex-1 flex-col bg-white p-5 text-xs dark:bg-slate-900">
+        <div className="flex flex-1 min-w-0 flex-col bg-white p-3.5 sm:p-5 text-xs dark:bg-slate-900">
           {/* Top Repo Header */}
           <div className="flex items-center gap-1.5 pb-4 border-b border-slate-100 dark:border-slate-800/60">
             <GitHubIcon className="size-4 text-slate-800 dark:text-slate-200 transition-transform duration-200 hover:scale-110" />
-            <span className="font-semibold text-slate-900 dark:text-slate-100">
+            <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">
               vercel/next.js
             </span>
-            <ChevronDown className="size-3.5 text-slate-400 cursor-pointer hover:text-slate-600" />
+            <ChevronDown className="size-3.5 text-slate-400 cursor-pointer hover:text-slate-600 shrink-0" />
           </div>
 
           {/* Chat Transcript */}
@@ -105,7 +105,7 @@ export function AppMockupPreview() {
             {/* Assistant Response */}
             <div className="flex items-start gap-3">
               <RepoChatIcon className="size-7 shrink-0 rounded-lg mt-0.5 transition-transform duration-300 hover:scale-110 hover:rotate-6" />
-              <div className="flex-1 space-y-3 text-slate-700 dark:text-slate-300 leading-relaxed">
+              <div className="flex-1 min-w-0 space-y-3 text-slate-700 dark:text-slate-300 leading-relaxed">
                 <p>
                   The App Router in Next.js handles authentication through middleware
                   and server components. It uses a combination of route protection,
@@ -117,39 +117,39 @@ export function AppMockupPreview() {
 
                 {/* Citations Box */}
                 <div className="rounded-xl border border-slate-200/80 bg-[#f8f9fa] p-3 my-2 text-xs space-y-1.5 dark:border-slate-800 dark:bg-slate-950/50">
-                  <div className="group/cite flex items-center gap-3 rounded-lg p-1.5 transition-all duration-200 hover:bg-white dark:hover:bg-slate-900 hover:border hover:border-blue-400/50 hover:shadow-2xs cursor-pointer">
+                  <div className="group/cite flex items-center gap-2 sm:gap-3 rounded-lg p-1.5 transition-all duration-200 hover:bg-white dark:hover:bg-slate-900 hover:border hover:border-blue-400/50 hover:shadow-2xs cursor-pointer min-w-0">
                     <FileCode className="size-3.5 text-slate-500 shrink-0 transition-colors group-hover/cite:text-blue-500" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover/cite:text-blue-600 dark:group-hover/cite:text-blue-400">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover/cite:text-blue-600 dark:group-hover/cite:text-blue-400 shrink-0">
                       middleware.ts
                     </span>
-                    <span className="font-mono text-[11px] text-slate-400">
+                    <span className="font-mono text-[11px] text-slate-400 truncate">
                       src/middleware.ts
                     </span>
-                    <span className="ml-auto font-mono text-[11px] text-slate-400">
+                    <span className="ml-auto font-mono text-[11px] text-slate-400 shrink-0">
                       L12-34
                     </span>
                   </div>
-                  <div className="group/cite flex items-center gap-3 rounded-lg p-1.5 transition-all duration-200 hover:bg-white dark:hover:bg-slate-900 hover:border hover:border-blue-400/50 hover:shadow-2xs cursor-pointer">
+                  <div className="group/cite flex items-center gap-2 sm:gap-3 rounded-lg p-1.5 transition-all duration-200 hover:bg-white dark:hover:bg-slate-900 hover:border hover:border-blue-400/50 hover:shadow-2xs cursor-pointer min-w-0">
                     <FileCode className="size-3.5 text-slate-500 shrink-0 transition-colors group-hover/cite:text-blue-500" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover/cite:text-blue-600 dark:group-hover/cite:text-blue-400">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover/cite:text-blue-600 dark:group-hover/cite:text-blue-400 shrink-0">
                       auth.ts
                     </span>
-                    <span className="font-mono text-[11px] text-slate-400">
+                    <span className="font-mono text-[11px] text-slate-400 truncate">
                       src/lib/auth.ts
                     </span>
-                    <span className="ml-auto font-mono text-[11px] text-slate-400">
+                    <span className="ml-auto font-mono text-[11px] text-slate-400 shrink-0">
                       L1-52
                     </span>
                   </div>
-                  <div className="group/cite flex items-center gap-3 rounded-lg p-1.5 transition-all duration-200 hover:bg-white dark:hover:bg-slate-900 hover:border hover:border-blue-400/50 hover:shadow-2xs cursor-pointer">
+                  <div className="group/cite flex items-center gap-2 sm:gap-3 rounded-lg p-1.5 transition-all duration-200 hover:bg-white dark:hover:bg-slate-900 hover:border hover:border-blue-400/50 hover:shadow-2xs cursor-pointer min-w-0">
                     <FileCode className="size-3.5 text-slate-500 shrink-0 transition-colors group-hover/cite:text-blue-500" />
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover/cite:text-blue-600 dark:group-hover/cite:text-blue-400">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 transition-colors group-hover/cite:text-blue-600 dark:group-hover/cite:text-blue-400 shrink-0">
                       session.ts
                     </span>
-                    <span className="font-mono text-[11px] text-slate-400">
+                    <span className="font-mono text-[11px] text-slate-400 truncate">
                       src/lib/session.ts
                     </span>
-                    <span className="ml-auto font-mono text-[11px] text-slate-400">
+                    <span className="ml-auto font-mono text-[11px] text-slate-400 shrink-0">
                       L8-29
                     </span>
                   </div>

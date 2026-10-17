@@ -6,7 +6,6 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { IndexStatus } from "@/lib/api";
 
@@ -81,7 +80,6 @@ export function DashboardHeader({
       <div className="flex flex-col gap-4 px-4 py-4 md:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-start gap-3">
-            <SidebarTrigger className="-ml-1 mt-0.5" />
             <div className="min-w-0">
               <h1 className="font-heading text-xl font-semibold tracking-tight">
                 Repositories

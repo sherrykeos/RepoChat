@@ -28,6 +28,15 @@ export function SettingsDashboard() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-4 md:p-6">
+      <div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          Settings
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          Manage your account profile, appearance, and preferences.
+        </p>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>

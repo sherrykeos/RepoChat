@@ -1,9 +1,9 @@
 import {
   Compass,
   FolderGit2,
-  Home,
+  LayoutDashboard,
   MessageSquare,
-  Search,
+  Network,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -17,21 +17,15 @@ export type DashboardNavItem = {
 
 export const mainNavItems: DashboardNavItem[] = [
   {
-    title: "Home",
-    href: "/",
-    icon: Home,
+    title: "Overview",
+    href: "/dashboard",
+    icon: LayoutDashboard,
     exact: true,
   },
   {
     title: "Repositories",
-    href: "/dashboard",
+    href: "/dashboard/repo",
     icon: FolderGit2,
-    exact: true,
-  },
-  {
-    title: "Explore",
-    href: "/dashboard/explore",
-    icon: Compass,
   },
   {
     title: "Chat",
@@ -39,9 +33,9 @@ export const mainNavItems: DashboardNavItem[] = [
     icon: MessageSquare,
   },
   {
-    title: "Search",
-    href: "/dashboard/search",
-    icon: Search,
+    title: "Explore",
+    href: "/dashboard/explore",
+    icon: Network,
   },
   {
     title: "Settings",
@@ -55,6 +49,22 @@ export function isDashboardNavActive(
   href: string,
   exact = false
 ) {
+  if (href === "/dashboard") {
+    return pathname === "/dashboard";
+  }
+
+  if (href === "/dashboard/repo") {
+    return (
+      pathname === "/dashboard/repo" ||
+      pathname.startsWith("/dashboard/repo/") ||
+      pathname.startsWith("/dashboard/indexing")
+    );
+  }
+
+  if (href === "/dashboard/chat") {
+    return pathname.startsWith("/dashboard/chat") || pathname.startsWith("/chat");
+  }
+
   if (exact) {
     return pathname === href;
   }

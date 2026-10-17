@@ -7,10 +7,7 @@ import { SettingsDashboard } from "@/components/dashboard/settings-dashboard";
 export default function SettingsPage() {
   return (
     <RequireAuth>
-      <AppShell
-        title="Settings"
-        description="Profile, appearance, and account preferences"
-      >
+      <AppShell hideHeader>
         <SettingsDashboard />
       </AppShell>
     </RequireAuth>

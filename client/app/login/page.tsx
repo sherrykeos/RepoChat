@@ -23,6 +23,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { getGithubLoginUrl } from '@/lib/api';
 import { useCurrentUser } from '@/hooks/use-auth';
+import { getSafeRedirectUrl } from '@/lib/safe-redirect';
 
 function LoginLoading(){
     return (
@@ -36,12 +37,12 @@ const LoginContent = () => {
      const params = useSearchParams();
   const router = useRouter();
   const error = params.get("error");
-  const next = params.get("next") || "/dashboard";
+  const next = params.get("next");
   const { data: user, isLoading } = useCurrentUser();
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.replace(next.startsWith("/") ? next : "/dashboard");
+      router.replace(getSafeRedirectUrl(next, "/dashboard"));
     }
   }, [user, isLoading, next, router]);
 

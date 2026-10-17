@@ -1,6 +1,7 @@
 import { getApiBaseUrl, ApiError, type ChatMessage } from "@/lib/api";
 
 export type StreamChatHandlers = {
+  onSessionUpdated?: (session: { id: string; title: string }) => void;
   onUserMessage?: (message: ChatMessage) => void;
   onToken?: (token: string) => void;
   onAssistantMessage?: (message: ChatMessage) => void;
@@ -71,7 +72,13 @@ export async function streamChatMessage(
       if (!data) continue;
 
       try {
-        if (event === "token") {
+        if (event === "session_updated") {
+          try {
+            handlers.onSessionUpdated?.(JSON.parse(data) as { id: string; title: string });
+          } catch {
+            // ignore
+          }
+        } else if (event === "token") {
           handlers.onToken?.(JSON.parse(data) as string);
         } else if (event === "user_message") {
           handlers.onUserMessage?.(JSON.parse(data) as ChatMessage);
@@ -85,11 +92,16 @@ export async function streamChatMessage(
           } catch {
             // keep raw data
           }
-          throw new Error(errText);
+          const streamErr = new Error(errText);
+          handlers.onError?.(streamErr);
+          throw streamErr;
         } else if (event === "done") {
           handlers.onDone?.();
         }
       } catch (err) {
+        if (event === "error") {
+          throw err;
+        }
         handlers.onError?.(
           err instanceof Error ? err : new Error("Failed to parse SSE event")
         );

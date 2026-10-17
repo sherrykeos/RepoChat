@@ -11,6 +11,7 @@ import {
   Loader2,
   RotateCcw,
   Sparkles,
+  Square,
   Terminal,
 } from "lucide-react";
 
@@ -18,7 +19,7 @@ import { GitHubIcon } from "@/components/icons/github-icon";
 import { RepoChatIcon } from "@/components/icons/repochat-icon";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useStartIndexing } from "@/hooks/use-repos";
+import { useStartIndexing, useStopIndexing } from "@/hooks/use-repos";
 import type { IndexStatusResponse, Repository } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,7 @@ export function IndexingState({
   status?: IndexStatusResponse;
 }) {
   const indexMutation = useStartIndexing();
+  const stopMutation = useStopIndexing();
   const filesProcessed = status?.filesProcessed ?? repo.filesProcessed ?? 0;
   const filesTotal = status?.filesTotal ?? repo.filesTotal ?? 0;
   const chunkCount = status?.chunkCount ?? repo.chunkCount ?? 0;
@@ -118,7 +120,7 @@ export function IndexingState({
   return (
     <div className="flex h-full w-full flex-col overflow-y-auto bg-background p-6 sm:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
         <div>
           <div className="text-[11px] font-semibold text-primary uppercase tracking-wider">
             Indexing Repository
@@ -128,9 +130,25 @@ export function IndexingState({
             <span>{repo.fullName}</span>
           </h2>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
-          <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
-          <span>Indexing in progress</span>
+        <div className="flex items-center gap-2.5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
+            <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+            <span>Indexing in progress</span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => stopMutation.mutate(repo.id)}
+            disabled={stopMutation.isPending}
+            className="h-8 gap-1.5 rounded-lg border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive text-xs font-medium cursor-pointer transition-all shadow-2xs"
+          >
+            {stopMutation.isPending ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Square className="size-3.5 fill-current" />
+            )}
+            <span>{stopMutation.isPending ? "Stopping..." : "Stop Indexing"}</span>
+          </Button>
         </div>
       </div>
 
@@ -140,7 +158,7 @@ export function IndexingState({
         <div className="relative flex items-center justify-center lg:col-span-7 py-8">
           <div className="relative flex size-64 sm:size-80 items-center justify-center">
             {/* Outer ring */}
-            <div className="absolute inset-0 rounded-full border border-border/80 dark:border-[#30363d] animate-[spin_20s_linear_infinite]" />
+            <div className="absolute inset-0 rounded-full border border-border animate-[spin_20s_linear_infinite]" />
             {/* Middle ring */}
             <div className="absolute inset-8 rounded-full border border-dashed border-primary/30 animate-[spin_15s_linear_infinite_reverse]" />
             {/* Inner ring */}
@@ -224,9 +242,21 @@ export function IndexingState({
           <span className="font-semibold text-foreground">
             Indexing Progress
           </span>
-          <span className="font-mono text-sm font-bold text-primary">
-            {hasTotal ? `${progress}%` : "In Progress"}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-sm font-bold text-primary">
+              {hasTotal ? `${progress}%` : "In Progress"}
+            </span>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => stopMutation.mutate(repo.id)}
+              disabled={stopMutation.isPending}
+              className="h-6 px-2 text-[11px] font-medium text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer gap-1"
+            >
+              <Square className="size-2.5 fill-current" />
+              <span>{stopMutation.isPending ? "Stopping..." : "Stop"}</span>
+            </Button>
+          </div>
         </div>
 
         <Progress
@@ -266,8 +296,8 @@ export function IndexingState({
       </div>
 
       {/* Daemon Status Summary */}
-      <div className="mt-6 rounded-xl border border-border bg-[#0d1117] p-4 font-mono text-xs text-slate-300 shadow-md">
-        <div className="flex items-center justify-between border-b border-[#30363d] pb-2 text-[11px] text-slate-400">
+      <div className="mt-6 rounded-xl border border-border bg-card p-4 font-mono text-xs text-foreground/80 shadow-md">
+        <div className="flex items-center justify-between border-b border-border pb-2 text-[11px] text-muted-foreground">
           <div className="flex items-center gap-2">
             <Terminal className="size-3.5 text-cyan-400" />
             <span>pipeline_status</span>

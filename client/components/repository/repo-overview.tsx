@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
@@ -36,6 +36,14 @@ export function RepoOverview({ repoId }: { repoId: string }) {
   const [activeTab, setActiveTab] = useState<
     "overview" | "readme" | "chat" | "files" | "architecture" | "insights" | "settings"
   >("overview");
+
+  useEffect(() => {
+    if (repoId) {
+      router.prefetch(`/chat/${repoId}`);
+      router.prefetch(`/dashboard/explore?repo=${repoId}`);
+      router.prefetch(`/dashboard/explore?tab=architecture&repo=${repoId}`);
+    }
+  }, [repoId, router]);
 
   if (repoQuery.isLoading) {
     return (
@@ -249,34 +257,43 @@ export function RepoOverview({ repoId }: { repoId: string }) {
           {[
             { id: "overview", label: "Overview" },
             { id: "readme", label: "README.md" },
-            { id: "chat", label: "Chat" },
-            { id: "files", label: "Files" },
-            { id: "architecture", label: "Architecture" },
+            { id: "chat", label: "Chat", href: `/chat/${repo.id}` },
+            { id: "files", label: "Files", href: `/dashboard/explore?repo=${repo.id}` },
+            { id: "architecture", label: "Architecture", href: `/dashboard/explore?tab=architecture&repo=${repo.id}` },
             { id: "settings", label: "Settings" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              onClick={() => {
-                if (t.id === "chat") {
-                  router.push(`/chat/${repo.id}`);
-                } else if (t.id === "files") {
-                  router.push(`/dashboard/explore?repo=${repo.id}`);
-                } else if (t.id === "architecture") {
-                  router.push(`/dashboard/explore?tab=architecture&repo=${repo.id}`);
-                } else {
-                  setActiveTab(t.id as any);
-                }
-              }}
-              className={cn(
-                "rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors",
-                activeTab === t.id
-                  ? "bg-primary/10 text-primary font-semibold dark:bg-primary/15"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
+          ].map((t) => {
+            const isRoute = Boolean(t.href);
+            const tabClasses = cn(
+              "rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors inline-flex items-center cursor-pointer",
+              activeTab === t.id
+                ? "bg-primary/10 text-primary font-semibold dark:bg-primary/15"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            );
+
+            if (isRoute && t.href) {
+              return (
+                <Link
+                  key={t.id}
+                  href={t.href}
+                  prefetch={true}
+                  className={tabClasses}
+                >
+                  {t.label}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTab(t.id as any)}
+                className={tabClasses}
+              >
+                {t.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

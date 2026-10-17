@@ -73,48 +73,45 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
 }) => {
   const [autoSettled, setAutoSettled] = useState(false);
   const [open, setOpen] = useState(true);
-  const [elapsedDs, setElapsedDs] = useState(0);
-  const settledTimeRef = useRef<number | null>(null);
+  const [internalElapsedDs, setInternalElapsedDs] = useState(0);
+
+  // Synchronize state during render when working prop changes
+  const [prevWorkingProp, setPrevWorkingProp] = useState(working);
+  if (working !== prevWorkingProp) {
+    setPrevWorkingProp(working);
+    if (working) {
+      setAutoSettled(false);
+    }
+  }
 
   const isWorking = working && !autoSettled;
   const doneText = doneLabel || (showTimer ? 'Thought for' : 'Done thinking');
   const hasTrace = steps.length > 0;
 
-  useEffect(() => {
-    if (working) {
-      setAutoSettled(false);
-      settledTimeRef.current = null;
-    }
-  }, [working]);
-
-  useEffect(() => {
+  // Synchronize open state during render when isWorking changes
+  const [prevIsWorking, setPrevIsWorking] = useState(isWorking);
+  if (isWorking !== prevIsWorking) {
+    setPrevIsWorking(isWorking);
     if (isWorking) {
       setOpen(true);
     } else if (collapseOnSettle) {
       setOpen(false);
     }
-  }, [isWorking, collapseOnSettle]);
+  }
 
-  // Timer tick
+  // Derive elapsed tenths of a second: passed prop takes precedence, otherwise internal timer
+  const elapsedDs = elapsed != null ? Math.round(elapsed * 10) : internalElapsedDs;
+
+  // Timer tick effect - only runs when actively working and no external elapsed prop
   useEffect(() => {
-    if (elapsed != null) {
-      setElapsedDs(Math.round(elapsed * 10));
-      return undefined;
-    }
-    if (!isWorking) {
-      if (settledTimeRef.current !== null) {
-        setElapsedDs(settledTimeRef.current);
-      }
+    if (elapsed != null || !isWorking) {
       return undefined;
     }
 
     const start = performance.now();
-    setElapsedDs(0);
-
     const interval = setInterval(() => {
       const ds = Math.floor((performance.now() - start) / 100);
-      setElapsedDs(ds);
-      settledTimeRef.current = ds;
+      setInternalElapsedDs(ds);
       if (settleAfter > 0 && ds >= Math.round(settleAfter * 10)) {
         setAutoSettled(true);
       }

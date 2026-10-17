@@ -301,7 +301,7 @@ export function ChatView({ repoId }: { repoId: string }) {
               )}
             >
               <PanelLeft className="size-3" />
-              <span>History</span>
+              <span>Config</span>
               {sessionsQuery.data && sessionsQuery.data.length > 0 && (
                 <span className="rounded-full bg-muted border border-border px-1.5 py-0.2 text-[10px] text-muted-foreground">
                   {sessionsQuery.data.length}

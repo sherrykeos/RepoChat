@@ -8,3 +8,5 @@ CREATE TABLE IF NOT EXISTS public.vector_store (
     metadata json,
     embedding vector(3072)
 );
+
+CREATE INDEX IF NOT EXISTS idx_vector_store_repo_id ON public.vector_store ((metadata->>'repoId'));

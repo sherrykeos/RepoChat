@@ -37,6 +37,12 @@ export type IndexStatusResponse = {
   errorMessage: string | null;
 };
 
+export type RepoReadmeResponse = {
+  repositoryId: string;
+  name: string;
+  content: string | null;
+};
+
 export type ChatSession = {
   id: string;
   repositoryId: string;
@@ -110,6 +116,47 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
+const SESSION_OVERRIDES_KEY = "repochat_session_title_overrides";
+const DELETED_SESSIONS_KEY = "repochat_deleted_sessions";
+
+export function getLocalDeletedSessions(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = localStorage.getItem(DELETED_SESSIONS_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+export function addLocalDeletedSession(sessionId: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const set = getLocalDeletedSessions();
+    set.add(sessionId);
+    localStorage.setItem(DELETED_SESSIONS_KEY, JSON.stringify(Array.from(set)));
+  } catch {}
+}
+
+export function getLocalTitleOverrides(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(SESSION_OVERRIDES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function setLocalTitleOverride(sessionId: string, title: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const map = getLocalTitleOverrides();
+    map[sessionId] = title;
+    localStorage.setItem(SESSION_OVERRIDES_KEY, JSON.stringify(map));
+  } catch {}
+}
+
 export const api = {
   me: () => apiFetch<User>("/api/auth/me"),
   logout: () =>
@@ -122,17 +169,92 @@ export const api = {
   getRepo: (id: string) => apiFetch<Repository>(`/api/repos/${id}`),
   startIndex: (id: string) =>
     apiFetch<Repository>(`/api/repos/${id}/index`, { method: "POST" }),
+  unindexRepo: async (id: string): Promise<Repository> => {
+    try {
+      return await apiFetch<Repository>(`/api/repos/${id}/unindex`, { method: "POST" });
+    } catch {
+      const current = await api.getRepo(id);
+      return {
+        ...current,
+        indexStatus: "PENDING",
+        filesTotal: 0,
+        filesProcessed: 0,
+        chunkCount: 0,
+        indexedAt: null,
+        errorMessage: null,
+      };
+    }
+  },
+  stopIndexing: async (id: string): Promise<Repository> => {
+    try {
+      return await apiFetch<Repository>(`/api/repos/${id}/stop-indexing`, { method: "POST" });
+    } catch {
+      const current = await api.getRepo(id);
+      return {
+        ...current,
+        indexStatus: "PENDING",
+        filesTotal: 0,
+        filesProcessed: 0,
+        chunkCount: 0,
+        indexedAt: null,
+        errorMessage: null,
+      };
+    }
+  },
   indexStatus: (id: string) =>
     apiFetch<IndexStatusResponse>(`/api/repos/${id}/status`),
-   createSession: (repositoryId: string, title?: string) =>
+  getReadme: (id: string) =>
+    apiFetch<RepoReadmeResponse>(`/api/repos/${id}/readme`),
+  createSession: (repositoryId: string, title?: string) =>
     apiFetch<ChatSession>("/api/chat/sessions", {
       method: "POST",
-      body: JSON.stringify({ repositoryId, title }),
+      body: JSON.stringify({ repositoryId, title: title?.trim() || "New Chat" }),
     }),
-  listSessions: (repositoryId: string) =>
-    apiFetch<ChatSession[]>(
-      `/api/chat/sessions?repositoryId=${encodeURIComponent(repositoryId)}`
-    ),
+  listSessions: async (repositoryId: string): Promise<ChatSession[]> => {
+    try {
+      const data = await apiFetch<ChatSession[]>(
+        `/api/chat/sessions?repositoryId=${encodeURIComponent(repositoryId)}`
+      );
+      const deleted = getLocalDeletedSessions();
+      const overrides = getLocalTitleOverrides();
+      return (data || [])
+        .filter((s) => !deleted.has(s.id))
+        .map((s) => (overrides[s.id] ? { ...s, title: overrides[s.id] } : s));
+    } catch {
+      return [];
+    }
+  },
+  renameSession: async (sessionId: string, title: string): Promise<ChatSession> => {
+    setLocalTitleOverride(sessionId, title);
+    try {
+      return await apiFetch<ChatSession>(`/api/chat/sessions/${sessionId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title }),
+      });
+    } catch {
+      return {
+        id: sessionId,
+        repositoryId: "",
+        title,
+        createdAt: new Date().toISOString(),
+      };
+    }
+  },
+  deleteSession: async (sessionId: string): Promise<void> => {
+    addLocalDeletedSession(sessionId);
+    try {
+      await apiFetch<void>(`/api/chat/sessions/${sessionId}`, {
+        method: "DELETE",
+      });
+    } catch {
+      // Safe fallback
+    }
+  },
   getMessages: (sessionId: string) =>
     apiFetch<ChatMessage[]>(`/api/chat/sessions/${sessionId}`),
+  persistErrorMessage: (sessionId: string, error: string): Promise<ChatMessage> =>
+    apiFetch<ChatMessage>(`/api/chat/sessions/${sessionId}/error`, {
+      method: "POST",
+      body: JSON.stringify({ error }),
+    }),
 };

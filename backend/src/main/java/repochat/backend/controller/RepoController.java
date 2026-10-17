@@ -54,10 +54,30 @@ public class RepoController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(repoService.toResponse(repo));
     }
 
+    @PostMapping("/{id}/unindex")
+    public ResponseEntity<RepositoryResponse> unindex(@PathVariable UUID id) {
+        UUID userId = currentUser.require().getId();
+        Repository repo = indexingService.unindex(id, userId);
+        return ResponseEntity.ok(repoService.toResponse(repo));
+    }
+
+    @PostMapping(path = { "/{id}/stop-indexing", "/{id}/stop" })
+    public ResponseEntity<RepositoryResponse> stopIndexing(@PathVariable UUID id) {
+        UUID userId = currentUser.require().getId();
+        Repository repo = indexingService.stopIndexing(id, userId);
+        return ResponseEntity.ok(repoService.toResponse(repo));
+    }
+
     @GetMapping("/{id}/status")
     public IndexStatusResponse status(@PathVariable UUID id) {
         UUID userId = currentUser.require().getId();
         return repoService.status(id, userId);
+    }
+
+    @GetMapping("/{id}/readme")
+    public ResponseEntity<java.util.Map<String, Object>> getReadme(@PathVariable UUID id) {
+        UUID userId = currentUser.require().getId();
+        return ResponseEntity.ok(repoService.getReadme(id, userId));
     }
 
 }

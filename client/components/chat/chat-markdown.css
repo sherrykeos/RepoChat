@@ -82,3 +82,10 @@
 .chat-markdown [data-streamdown="strong"] {
   font-weight: 600;
 }
+
+.chat-markdown img {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}

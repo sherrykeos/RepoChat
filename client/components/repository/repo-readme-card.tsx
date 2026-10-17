@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import {
   BookOpen,
   Check,
@@ -12,12 +13,25 @@ import {
   RotateCcw,
 } from "lucide-react";
 
-import { ChatMarkdown } from "@/components/chat/chat-markdown";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRepoReadme } from "@/hooks/use-repos";
 import type { Repository } from "@/lib/api";
 import { cn } from "@/lib/utils";
+
+const ChatMarkdown = dynamic(
+  () => import("@/components/chat/chat-markdown").then((mod) => mod.ChatMarkdown),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3 py-4">
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+      </div>
+    ),
+  }
+);
 
 export function RepoReadmeCard({
   repo,
@@ -185,7 +199,7 @@ export function RepoReadmeCard({
               No README.md Available
             </h3>
             <p className="mt-1.5 text-xs text-muted-foreground max-w-sm leading-relaxed">
-              This repository doesn't have a README.md file in its default branch, or it could not be retrieved from GitHub.
+              This repository doesn&apos;t have a README.md file in its default branch, or it could not be retrieved from GitHub.
             </p>
             {repo.htmlUrl && (
               <Button

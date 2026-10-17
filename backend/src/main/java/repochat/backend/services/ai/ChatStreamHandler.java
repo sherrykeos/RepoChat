@@ -36,12 +36,22 @@ public class ChatStreamHandler {
             ChatMessageResponse savedUserMessage,
             List<CitationDto> citations,
             String systemPrompt,
-            String userPrompt) {
+            String userPrompt,
+            String updatedTitle) {
 
         SseEmitter emitter = new SseEmitter(RagSettings.STREAM_TIMEOUT_MS);
         StringBuilder fullReply = new StringBuilder();
 
         try {
+            if (updatedTitle != null) {
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("session_updated")
+                            .data(toJson(java.util.Map.of("id", sessionId.toString(), "title", updatedTitle))));
+                } catch (Exception ignored) {
+                }
+            }
+
             emitter.send(SseEmitter.event()
                     .name("user_message")
                     .data(toJson(savedUserMessage)));
@@ -56,10 +66,28 @@ public class ChatStreamHandler {
                     .doOnNext(token -> appendToken(emitter, fullReply, token))
                     .doOnError(err -> {
                         log.error("Chat stream error for session {}", sessionId, err);
+                        String detailedMsg = extractErrorMessage(err);
+                        String errContent = "⚠️ " + detailedMsg;
+                        try {
+                            ChatMessage savedErr = chatMessageRepository.save(ChatMessage.builder()
+                                    .sessionId(sessionId)
+                                    .role(MessageRole.ASSISTANT)
+                                    .content(errContent)
+                                    .citations("[]")
+                                    .build());
+                            try {
+                                emitter.send(SseEmitter.event()
+                                        .name("assistant_message")
+                                        .data(toJson(toMessageResponse(savedErr))));
+                            } catch (Exception ignored) {
+                            }
+                        } catch (Exception saveEx) {
+                            log.error("Failed to save error message to database for session {}", sessionId, saveEx);
+                        }
                         try {
                             emitter.send(SseEmitter.event()
                                     .name("error")
-                                    .data(toJson(err.getMessage() != null ? err.getMessage() : "AI response error")));
+                                    .data(toJson(detailedMsg)));
                         } catch (Exception ignored) {
                         }
                         emitter.completeWithError(err);
@@ -69,16 +97,60 @@ public class ChatStreamHandler {
                     .subscribe();
         } catch (Exception ex) {
             log.error("Error initializing chat stream for session {}", sessionId, ex);
+            String detailedMsg = extractErrorMessage(ex);
+            String errContent = "⚠️ " + detailedMsg;
+            try {
+                ChatMessage savedErr = chatMessageRepository.save(ChatMessage.builder()
+                        .sessionId(sessionId)
+                        .role(MessageRole.ASSISTANT)
+                        .content(errContent)
+                        .citations("[]")
+                        .build());
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("assistant_message")
+                            .data(toJson(toMessageResponse(savedErr))));
+                } catch (Exception ignored) {
+                }
+            } catch (Exception saveEx) {
+                log.error("Failed to save error message to database for session {}", sessionId, saveEx);
+            }
             try {
                 emitter.send(SseEmitter.event()
                         .name("error")
-                        .data(toJson(ex.getMessage() != null ? ex.getMessage() : "Failed to start chat stream")));
+                        .data(toJson(detailedMsg)));
             } catch (Exception ignored) {
             }
             emitter.completeWithError(ex);
         }
 
         return emitter;
+    }
+
+    private String extractErrorMessage(Throwable t) {
+        if (t == null) return "AI service encountered an unexpected error.";
+        
+        // Traverse cause chain to find the most informative message
+        Throwable current = t;
+        String bestMessage = t.getMessage();
+        while (current != null) {
+            String msg = current.getMessage();
+            if (msg != null && !msg.isBlank()) {
+                bestMessage = msg;
+                if (msg.contains("429") || msg.toLowerCase().contains("quota") || msg.toLowerCase().contains("resource_exhausted")) {
+                    return "Rate limit / Quota exceeded: The AI model quota has been reached on this API key.\n\n**Details**: " + msg + "\n\n💡 *Tip: Wait a moment or configure `GEMINI_CHAT_MODEL=gemini-3.5-flash` in `backend/.env`.*";
+                }
+                if (msg.contains("404") || msg.toLowerCase().contains("not found")) {
+                    return "Model not found: " + msg + "\n\n💡 *Tip: Verify that the configured model name is available in your Gemini region.*";
+                }
+                if (msg.contains("401") || msg.contains("403") || msg.toLowerCase().contains("api key")) {
+                    return "Authentication error: " + msg + "\n\n💡 *Tip: Please verify your `GEMINI_API_KEY`.*";
+                }
+            }
+            current = current.getCause();
+        }
+
+        return bestMessage != null && !bestMessage.isBlank() ? bestMessage : "AI response error occurred: " + t.getClass().getSimpleName();
     }
 
     private void appendToken(SseEmitter emitter, StringBuilder fullReply, String token) {

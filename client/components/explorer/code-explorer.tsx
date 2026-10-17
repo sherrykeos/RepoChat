@@ -81,7 +81,7 @@ export function CodeExplorer({
                     }`
                   )
                 }
-                className="gap-1.5 rounded-md bg-[#1f2328] text-white hover:bg-[#2c3138] dark:bg-[#f0f6fc] dark:text-[#0d1117] dark:hover:bg-[#e6edf3] text-xs h-8"
+                className="gap-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-8"
               >
                 <MessageSquare className="size-3.5" />
                 <span>Chat about this repository</span>

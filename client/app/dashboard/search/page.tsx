@@ -10,7 +10,7 @@ function SearchPageContent() {
   const query = searchParams.get("q") || "";
 
   return (
-    <AppShell title="Search" description="Semantic and keyword search across your indexed codebase">
+    <AppShell hideHeader>
       <SearchView initialQuery={query} />
     </AppShell>
   );

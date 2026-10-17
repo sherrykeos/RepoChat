@@ -30,9 +30,9 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
   const [isGenerated, setIsGenerated] = useState(false);
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#0d1117] text-slate-100">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-background text-foreground">
       {/* Top Header & Tabs bar */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-[#30363d] bg-[#161b22] px-4">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card px-4">
         <div className="flex items-center gap-1">
           {[
             { id: "diagram", label: "System Diagram" },
@@ -46,8 +46,8 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
               className={cn(
                 "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                 activeTab === tab.id
-                  ? "bg-[#21262d] text-[#58a6ff] font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-muted text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               {tab.label}
@@ -56,7 +56,7 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
         </div>
 
         {/* Legend */}
-        <div className="hidden sm:flex items-center gap-3 text-[11px] text-slate-400">
+        <div className="hidden sm:flex items-center gap-3 text-[11px] text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-[#58a6ff]" />
             <span>Frontend</span>
@@ -82,22 +82,22 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
         <div
           className="absolute inset-0 opacity-20 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(#30363d 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(var(--border) 1px, transparent 1px)",
             backgroundSize: "24px 24px",
           }}
         />
 
         {!isGenerated ? (
-          <div className="relative z-10 flex max-w-md flex-col items-center justify-center rounded-2xl border border-[#30363d] bg-[#161b22] p-8 text-center shadow-xl">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-[#21262d] border border-[#30363d]">
-              <Layers className="size-7 text-[#58a6ff]" />
+          <div className="relative z-10 flex max-w-md flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 text-center shadow-xl">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-muted border border-border">
+              <Layers className="size-7 text-primary" />
             </div>
 
-            <h3 className="mt-4 font-heading text-base font-semibold text-slate-100">
+            <h3 className="mt-4 font-heading text-base font-semibold text-foreground">
               Architecture Analysis
             </h3>
 
-            <p className="mt-2 text-xs leading-relaxed text-slate-400">
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
               {repo
                 ? `Generate a structural topology map for ${repo.fullName} based on indexed repository packages, controllers, and services.`
                 : "Connect and select a repository to generate an interactive system architecture diagram."}
@@ -121,19 +121,19 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
             className="relative max-w-4xl w-full flex flex-col items-center gap-10"
           >
             {/* Status pill */}
-            <div className="rounded-full border border-[#30363d] bg-[#161b22] px-3 py-1 font-mono text-[10px] text-slate-400">
+            <div className="rounded-full border border-border bg-card px-3 py-1 font-mono text-[10px] text-muted-foreground">
               Topology: {repo?.fullName ?? "Repository Root"}
             </div>
 
             {/* LEVEL 1: Client Layer */}
-            <div className="relative z-10 w-64 rounded-xl border border-[#388bfd]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-blue-950/40">
+            <div className="relative z-10 w-64 rounded-xl border border-primary/40 bg-card p-4 text-center shadow-lg">
               <div className="flex items-center justify-center gap-2">
-                <Globe className="size-4 text-[#58a6ff]" />
-                <h4 className="font-heading text-xs font-bold text-slate-100">
+                <Globe className="size-4 text-primary" />
+                <h4 className="font-heading text-xs font-bold text-foreground">
                   Client Interface
                 </h4>
               </div>
-              <div className="mt-1 font-mono text-[11px] text-[#79c0ff]">
+              <div className="mt-1 font-mono text-[11px] text-primary/80">
                 Web Client · HTTP Requests
               </div>
             </div>
@@ -142,26 +142,26 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
 
             {/* LEVEL 2: API & Controllers */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-2xl">
-              <div className="rounded-xl border border-[#8957e5]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-purple-950/30">
+              <div className="rounded-xl border border-purple-500/40 bg-card p-4 text-center shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <Server className="size-4 text-[#a371f7]" />
-                  <h4 className="font-heading text-xs font-bold text-slate-100">
+                  <Server className="size-4 text-purple-500" />
+                  <h4 className="font-heading text-xs font-bold text-foreground">
                     API & Routing Layer
                   </h4>
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[#d2a8ff]">
+                <div className="mt-1 font-mono text-[11px] text-purple-400">
                   Controllers · Endpoints
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#8957e5]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-purple-950/30">
+              <div className="rounded-xl border border-purple-500/40 bg-card p-4 text-center shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <Lock className="size-4 text-[#a371f7]" />
-                  <h4 className="font-heading text-xs font-bold text-slate-100">
+                  <Lock className="size-4 text-purple-500" />
+                  <h4 className="font-heading text-xs font-bold text-foreground">
                     Security & Middleware
                   </h4>
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[#d2a8ff]">
+                <div className="mt-1 font-mono text-[11px] text-purple-400">
                   Auth · Guards · Interceptors
                 </div>
               </div>
@@ -171,26 +171,26 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
 
             {/* LEVEL 3: Business Services */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-2xl">
-              <div className="rounded-xl border border-[#238636]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-emerald-950/30">
+              <div className="rounded-xl border border-emerald-500/40 bg-card p-4 text-center shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <Layers className="size-4 text-[#3fb950]" />
-                  <h4 className="font-heading text-xs font-bold text-slate-100">
+                  <Layers className="size-4 text-emerald-500" />
+                  <h4 className="font-heading text-xs font-bold text-foreground">
                     Service Layer
                   </h4>
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[#7ee787]">
+                <div className="mt-1 font-mono text-[11px] text-emerald-500/90">
                   Business & Domain Logic
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#238636]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-emerald-950/30">
+              <div className="rounded-xl border border-emerald-500/40 bg-card p-4 text-center shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <Database className="size-4 text-[#3fb950]" />
-                  <h4 className="font-heading text-xs font-bold text-slate-100">
+                  <Database className="size-4 text-emerald-500" />
+                  <h4 className="font-heading text-xs font-bold text-foreground">
                     Data Persistence
                   </h4>
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[#7ee787]">
+                <div className="mt-1 font-mono text-[11px] text-emerald-500/90">
                   Repositories · ORM Entities
                 </div>
               </div>
@@ -200,26 +200,26 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
 
             {/* LEVEL 4: Database / Vector Store */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-xl">
-              <div className="rounded-xl border border-[#d29922]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-amber-950/30">
+              <div className="rounded-xl border border-amber-500/40 bg-card p-4 text-center shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <Database className="size-4 text-[#e3b341]" />
-                  <h4 className="font-heading text-xs font-bold text-slate-100">
+                  <Database className="size-4 text-amber-500" />
+                  <h4 className="font-heading text-xs font-bold text-foreground">
                     Database Store
                   </h4>
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[#ffa657]">
+                <div className="mt-1 font-mono text-[11px] text-amber-500/90">
                   SQL / NoSQL Data Store
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#d29922]/40 bg-[#161b22] p-4 text-center shadow-lg shadow-amber-950/30">
+              <div className="rounded-xl border border-amber-500/40 bg-card p-4 text-center shadow-lg">
                 <div className="flex items-center justify-center gap-2">
-                  <Terminal className="size-4 text-[#e3b341]" />
-                  <h4 className="font-heading text-xs font-bold text-slate-100">
+                  <Terminal className="size-4 text-amber-500" />
+                  <h4 className="font-heading text-xs font-bold text-foreground">
                     Vector Intelligence
                   </h4>
                 </div>
-                <div className="mt-1 font-mono text-[11px] text-[#ffa657]">
+                <div className="mt-1 font-mono text-[11px] text-amber-500/90">
                   RepoChat pgvector Index
                 </div>
               </div>
@@ -229,22 +229,22 @@ export function ArchitectureView({ repoId }: { repoId?: string }) {
 
         {/* Zoom controls at bottom right */}
         {isGenerated && (
-          <div className="absolute bottom-6 right-6 flex items-center gap-1 rounded-lg border border-[#30363d] bg-[#161b22] p-1 shadow-md">
+          <div className="absolute bottom-6 right-6 flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-md">
             <button
               onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.1))}
-              className="flex size-7 items-center justify-center rounded text-slate-400 hover:bg-[#21262d] hover:text-slate-100"
+              className="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <Minus className="size-3.5" />
             </button>
             <button
               onClick={() => setZoomLevel(1)}
-              className="px-2 text-xs font-mono text-slate-300 hover:bg-[#21262d] rounded py-1"
+              className="px-2 text-xs font-mono text-foreground hover:bg-muted rounded py-1"
             >
               {Math.round(zoomLevel * 100)}%
             </button>
             <button
               onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))}
-              className="flex size-7 items-center justify-center rounded text-slate-400 hover:bg-[#21262d] hover:text-slate-100"
+              className="flex size-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <Plus className="size-3.5" />
             </button>

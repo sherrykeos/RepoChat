@@ -11,6 +11,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { CustomSelectDropdown } from "@/components/ui/custom-select-dropdown";
 import { cn } from "@/lib/utils";
 
 export function SearchView({ initialQuery = "" }: { initialQuery?: string }) {
@@ -66,18 +67,19 @@ export function SearchView({ initialQuery = "" }: { initialQuery?: string }) {
 
           {/* Dropdown */}
           <div className="flex items-center gap-2">
-            <select
+            <CustomSelectDropdown
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              aria-label="Filter search by language"
-              className="h-7 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="All">Language: All</option>
-              <option value="Java">Java</option>
-              <option value="TypeScript">TypeScript</option>
-              <option value="JavaScript">JavaScript</option>
-              <option value="Python">Python</option>
-            </select>
+              onChange={setLanguage}
+              prefix="Language: "
+              options={[
+                { value: "All", label: "All" },
+                { value: "Java", label: "Java" },
+                { value: "TypeScript", label: "TypeScript" },
+                { value: "JavaScript", label: "JavaScript" },
+                { value: "Python", label: "Python" },
+              ]}
+              className="h-7 border-border bg-background text-xs text-foreground"
+            />
           </div>
         </div>
       </div>
@@ -108,7 +110,7 @@ export function SearchView({ initialQuery = "" }: { initialQuery?: string }) {
               Semantic retrieval is currently integrated through RepoChat Chat. You can ask questions about &quot;{query}&quot; directly in the chat interface.
             </p>
             <Button
-              className="mt-6 gap-2 rounded-md bg-[#1f2328] text-white hover:bg-[#2c3138] dark:bg-[#f0f6fc] dark:text-[#0d1117] dark:hover:bg-[#e6edf3]"
+              className="mt-6 gap-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => router.push(`/dashboard/chat`)}
             >
               <MessageSquare className="size-3.5" />

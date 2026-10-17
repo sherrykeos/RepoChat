@@ -16,20 +16,25 @@ import {
   RefreshCw,
   Share2,
   Sparkles,
+  Square,
+  Trash2,
 } from "lucide-react";
 
 import { GitHubIcon } from "@/components/icons/github-icon";
+import { RepoReadmeCard } from "@/components/repository/repo-readme-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRepository, useStartIndexing } from "@/hooks/use-repos";
+import { useRepository, useStartIndexing, useStopIndexing, useUnindexRepo } from "@/hooks/use-repos";
 import { cn } from "@/lib/utils";
 
 export function RepoOverview({ repoId }: { repoId: string }) {
   const router = useRouter();
   const repoQuery = useRepository(repoId);
   const indexMutation = useStartIndexing();
+  const unindexMutation = useUnindexRepo();
+  const stopMutation = useStopIndexing();
   const [activeTab, setActiveTab] = useState<
-    "overview" | "chat" | "files" | "architecture" | "insights" | "settings"
+    "overview" | "readme" | "chat" | "files" | "architecture" | "insights" | "settings"
   >("overview");
 
   if (repoQuery.isLoading) {
@@ -90,14 +95,64 @@ export function RepoOverview({ repoId }: { repoId: string }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => router.push(`/chat/${repo.id}`)}
-            className="h-8 gap-1.5 rounded-md bg-[#1f2328] px-3.5 text-xs font-semibold text-white shadow-xs hover:bg-[#2c3138] dark:bg-[#f0f6fc] dark:text-[#0d1117] dark:hover:bg-[#e6edf3]"
-          >
-            <MessageSquare className="size-3.5" />
-            Open Chat
-          </Button>
+          {isReady && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => unindexMutation.mutate(repo.id)}
+              disabled={unindexMutation.isPending}
+              className="h-8 gap-1.5 rounded-md border-border text-destructive hover:bg-destructive/10 text-xs font-medium"
+            >
+              <Trash2 className="size-3.5" />
+              {unindexMutation.isPending ? "Unindexing..." : "Unindex"}
+            </Button>
+          )}
+          {isReady ? (
+            <Button
+              size="sm"
+              onClick={() => router.push(`/chat/${repo.id}`)}
+              className="h-8 gap-1.5 rounded-md bg-[#238636] px-3.5 text-xs font-semibold text-white shadow-xs hover:bg-[#2ea043]"
+            >
+              <MessageSquare className="size-3.5" />
+              Open Chat
+            </Button>
+          ) : isIndexing ? (
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push(`/chat/${repo.id}`)}
+                className="h-8 gap-1.5 rounded-md border-border text-primary hover:bg-muted text-xs font-medium"
+              >
+                <RefreshCw className="size-3.5 animate-spin" />
+                <span>Indexing in progress...</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => stopMutation.mutate(repo.id)}
+                disabled={stopMutation.isPending}
+                className="h-8 gap-1.5 rounded-md border-destructive/40 text-destructive hover:bg-destructive/10 text-xs font-medium cursor-pointer"
+              >
+                <Square className="size-3.5 fill-current" />
+                <span>{stopMutation.isPending ? "Stopping..." : "Stop Indexing"}</span>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleReindex}
+              disabled={indexMutation.isPending}
+              className="h-8 gap-1.5 rounded-md bg-[#2f81f7] px-3.5 text-xs font-semibold text-white shadow-xs hover:bg-[#388bfd]"
+            >
+              {indexMutation.isPending ? (
+                <RefreshCw className="size-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="size-3.5" />
+              )}
+              Index Repository
+            </Button>
+          )}
         </div>
       </div>
 
@@ -193,6 +248,7 @@ export function RepoOverview({ repoId }: { repoId: string }) {
         <div className="mt-6 flex flex-wrap items-center gap-1 border-t border-border pt-3">
           {[
             { id: "overview", label: "Overview" },
+            { id: "readme", label: "README.md" },
             { id: "chat", label: "Chat" },
             { id: "files", label: "Files" },
             { id: "architecture", label: "Architecture" },
@@ -224,10 +280,33 @@ export function RepoOverview({ repoId }: { repoId: string }) {
         </div>
       </div>
 
-      {/* Overview 2-Column Grid */}
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* Left Column (lg:col-span-8) */}
-        <div className="space-y-6 lg:col-span-8">
+      {/* Tab Contents */}
+      {activeTab === "readme" ? (
+        <div className="mt-6">
+          <RepoReadmeCard repo={repo} showFullHeight />
+        </div>
+      ) : activeTab === "settings" ? (
+        <div className="mt-6 rounded-xl border border-border bg-card p-6 shadow-xs space-y-4">
+          <h2 className="font-heading text-base font-semibold text-foreground">Repository Settings</h2>
+          <p className="text-xs text-muted-foreground">Manage indexing status and repository preferences.</p>
+          <div className="pt-2 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReindex}
+              disabled={indexMutation.isPending || isIndexing}
+              className="text-xs"
+            >
+              <RefreshCw className={cn("mr-2 size-3.5", indexMutation.isPending && "animate-spin")} />
+              Trigger Full Re-index
+            </Button>
+          </div>
+        </div>
+      ) : (
+        /* Overview 2-Column Grid */
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Left Column (lg:col-span-8) */}
+          <div className="space-y-6 lg:col-span-8">
           {/* About Card */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
             <h2 className="font-heading text-sm font-semibold text-foreground">
@@ -284,6 +363,9 @@ export function RepoOverview({ repoId }: { repoId: string }) {
               </div>
             </div>
           </div>
+
+          {/* README.md File Card */}
+          <RepoReadmeCard repo={repo} />
         </div>
 
         {/* Right Column (lg:col-span-4) */}
@@ -337,12 +419,14 @@ export function RepoOverview({ repoId }: { repoId: string }) {
               >
                 <RefreshCw
                   className={cn(
-                    "mr-2 size-3.5 text-blue-500",
+                    "mr-2 size-3.5 text-[#2f81f7]",
                     indexMutation.isPending && "animate-spin"
                   )}
                 />
-                Re-index Repository
+                {isReady ? "Re-index Repository" : "Index Repository"}
               </Button>
+
+              
 
               <Button
                 variant="outline"
@@ -361,10 +445,34 @@ export function RepoOverview({ repoId }: { repoId: string }) {
                 <Layers className="mr-2 size-3.5 text-violet-500" />
                 Generate Architecture
               </Button>
+
+              {isIndexing && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-xs font-medium text-destructive hover:bg-destructive/10"
+                  disabled={stopMutation.isPending}
+                  onClick={() => stopMutation.mutate(repo.id)}
+                >
+                  <Square className="mr-2 size-3.5 fill-current" />
+                  {stopMutation.isPending ? "Stopping..." : "Stop Indexing"}
+                </Button>
+              )}
+              {isReady && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-xs font-medium text-[#f9a7a3] hover:bg-[#f85149]/10"
+                  disabled={unindexMutation.isPending}
+                  onClick={() => unindexMutation.mutate(repo.id)}
+                >
+                  <Trash2 className="mr-2 size-3.5 text-[#ed7b75]" />
+                  {unindexMutation.isPending ? "Unindexing..." : "Unindex Repository"}
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    )}
+  </div>
+);
 }

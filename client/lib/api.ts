@@ -76,11 +76,18 @@ export class ApiError extends Error {
 }
 
 export function getApiBaseUrl() {
+  if (typeof window !== "undefined") {
+    // If accessed from a mobile phone or remote device on the local network (e.g. 192.168.0.195),
+    // automatically target the backend on the same host machine on port 8080
+    if (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      return `${window.location.protocol}//${window.location.hostname}:8080`;
+    }
+  }
   return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 }
 
 export function getGithubLoginUrl() {
-  return `${getApiBaseUrl()}/oauth2/authorization/github`;
+  return "/api/auth/github";
 }
 
 async function parseError(res: Response): Promise<string> {

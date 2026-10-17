@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GitHubIcon } from "@/components/icons/github-icon";
 import { XIcon } from "@/components/icons/x-icon";
 import { RepoChatIcon } from "@/components/icons/repochat-icon";
+import { SherryKeosSignature } from "@/components/icons/sherrykeos-signature";
 
 export function LandingFooter() {
   const currentYear = new Date().getFullYear();
@@ -43,16 +44,17 @@ export function LandingFooter() {
           </a>
         </div>
 
-        {/* Crafted by Sherry Koes */}
-        <div className="mt-5 text-[11.5px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+        {/* Crafted by Sherry Koes (Signature) */}
+        <div className="mt-5 text-[11.5px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
           <span>Crafted by</span>
           <a
             href="https://github.com/sherrykeos"
             target="_blank"
             rel="noreferrer"
-            className="font-semibold text-slate-800 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-400 underline underline-offset-4 decoration-slate-300 dark:decoration-slate-700 hover:decoration-blue-500 transition-colors"
+            aria-label="Sherry Koes GitHub"
+            className="group inline-flex items-center text-slate-900 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-400 transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
           >
-            Sherry Koes
+            <SherryKeosSignature className="h-7 sm:h-9 w-auto drop-shadow-2xl transition-colors group-hover:opacity-90" />
           </a>
         </div>
       </div>

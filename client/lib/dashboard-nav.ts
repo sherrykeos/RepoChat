@@ -1,6 +1,9 @@
 import {
+  Compass,
   FolderGit2,
-  LayoutGrid,
+  LayoutDashboard,
+  MessageSquare,
+  Network,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -12,37 +15,32 @@ export type DashboardNavItem = {
   exact?: boolean;
 };
 
-export type DashboardNavGroup = {
-  label: string;
-  items: DashboardNavItem[];
-};
-
-export const dashboardNavGroups: DashboardNavGroup[] = [
+export const mainNavItems: DashboardNavItem[] = [
   {
-    label: "Workspace",
-    items: [
-      {
-        title: "Overview",
-        href: "/dashboard/overview",
-        icon: LayoutGrid,
-      },
-      {
-        title: "Repositories",
-        href: "/dashboard",
-        icon: FolderGit2,
-        exact: true,
-      },
-    ],
+    title: "Overview",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    exact: true,
   },
   {
-    label: "Account",
-    items: [
-      {
-        title: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
-    ],
+    title: "Repositories",
+    href: "/dashboard/repo",
+    icon: FolderGit2,
+  },
+  {
+    title: "Chat",
+    href: "/dashboard/chat",
+    icon: MessageSquare,
+  },
+  {
+    title: "Explore",
+    href: "/dashboard/explore",
+    icon: Network,
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
   },
 ];
 
@@ -51,6 +49,22 @@ export function isDashboardNavActive(
   href: string,
   exact = false
 ) {
+  if (href === "/dashboard") {
+    return pathname === "/dashboard";
+  }
+
+  if (href === "/dashboard/repo") {
+    return (
+      pathname === "/dashboard/repo" ||
+      pathname.startsWith("/dashboard/repo/") ||
+      pathname.startsWith("/dashboard/indexing")
+    );
+  }
+
+  if (href === "/dashboard/chat") {
+    return pathname.startsWith("/dashboard/chat") || pathname.startsWith("/chat");
+  }
+
   if (exact) {
     return pathname === href;
   }

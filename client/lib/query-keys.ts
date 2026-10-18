@@ -8,6 +8,7 @@ export const queryKeys = {
     list: () => [...queryKeys.repos.all, "list"] as const,
     detail: (id: string) => [...queryKeys.repos.all, "detail", id] as const,
     status: (id: string) => [...queryKeys.repos.all, "status", id] as const,
+    readme: (id: string) => [...queryKeys.repos.all, "readme", id] as const,
   },
   chat: {
     all: ["chat"] as const,

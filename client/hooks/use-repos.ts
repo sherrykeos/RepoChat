@@ -60,6 +60,16 @@ export function useIndexStatus(repoId: string, enabled = false) {
   });
 }
 
+export function useRepoReadme(repoId: string, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.repos.readme(repoId),
+    queryFn: () => api.getReadme(repoId),
+    enabled: Boolean(repoId) && enabled,
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
+}
+
 export function useStartIndexing() {
   const queryClient = useQueryClient();
 
@@ -80,6 +90,72 @@ export function useStartIndexing() {
     onError: (error: Error) => {
       toast.add({
         title: "Could not start indexing",
+        description: error.message,
+        type: "error",
+      });
+    },
+  });
+}
+
+export function useUnindexRepo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (repoId: string) => api.unindexRepo(repoId),
+    onSuccess: (repo) => {
+      queryClient.setQueryData(queryKeys.repos.detail(repo.id), repo);
+      updateRepoInListCache(queryClient, repo);
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.repos.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.repos.detail(repo.id),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.repos.status(repo.id),
+      });
+      toast.add({
+        title: "Repository unindexed",
+        description: `Removed indexing for ${repo.fullName}.`,
+        type: "success",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        title: "Could not unindex repository",
+        description: error.message,
+        type: "error",
+      });
+    },
+  });
+}
+
+export function useStopIndexing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (repoId: string) => api.stopIndexing(repoId),
+    onSuccess: (repo) => {
+      queryClient.setQueryData(queryKeys.repos.detail(repo.id), repo);
+      updateRepoInListCache(queryClient, repo);
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.repos.list(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.repos.detail(repo.id),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.repos.status(repo.id),
+      });
+      toast.add({
+        title: "Indexing stopped",
+        description: `Stopped ongoing indexing for ${repo.fullName}.`,
+        type: "info",
+      });
+    },
+    onError: (error: Error) => {
+      toast.add({
+        title: "Could not stop indexing",
         description: error.message,
         type: "error",
       });

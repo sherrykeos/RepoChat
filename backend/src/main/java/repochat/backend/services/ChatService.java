@@ -21,9 +21,11 @@ import repochat.backend.repository.ChatMessageRepository;
 import repochat.backend.repository.ChatSessionRepository;
 import repochat.backend.services.ai.ChatPromptBuilder;
 import repochat.backend.services.ai.ChatStreamHandler;
+import repochat.backend.services.ai.ChatTitleExtractor;
 import repochat.backend.services.ai.CitationMapper;
 import repochat.backend.services.ai.CodeContextRetriever;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Chat sessions and the RAG chat pipeline entry point.
@@ -33,6 +35,7 @@ import lombok.RequiredArgsConstructor;
  * Each step is implemented in a dedicated class under {@code service.ai}.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ChatService {
 
@@ -52,8 +55,8 @@ public class ChatService {
         }
 
         String title = request.title() != null && !request.title().isBlank()
-                ? request.title()
-                : "Chat with " + repo.getFullName();
+                ? request.title().trim()
+                : "New Chat";
 
         ChatSession session = ChatSession.builder()
                 .userId(userId)
@@ -88,12 +91,38 @@ public class ChatService {
                 .orElseThrow(() -> new NotFoundException("Chat session not found"));
     }
 
+    @Transactional
+    public ChatSessionResponse renameSession(UUID userId, UUID sessionId, String newTitle) {
+        ChatSession session = requireSession(userId, sessionId);
+        if (newTitle == null || newTitle.isBlank()) {
+            throw new BadRequestException("Session title cannot be empty");
+        }
+        session.setTitle(newTitle.trim());
+        session = chatSessionRepository.save(session);
+        return toSessionResponse(session);
+    }
+
+    @Transactional
+    public void deleteSession(UUID userId, UUID sessionId) {
+        ChatSession session = requireSession(userId, sessionId);
+        chatMessageRepository.deleteBySessionId(session.getId());
+        chatSessionRepository.delete(session);
+    }
+
     public SseEmitter streamReply(UUID userId, UUID sessionId, String userContent) {
         // 1. Ensure the session exists and the repo is indexed
         ChatSession session = requireSession(userId, sessionId);
         Repository repo = repoService.requireOwned(session.getRepositoryId(), userId);
         if (repo.getIndexStatus() != IndexStatus.READY) {
             throw new BadRequestException("Repository is not ready for chat");
+        }
+
+        // Auto-rename session if it has default title ("New Chat", "Untitled chat", or "Chat with ...")
+        String updatedTitle = null;
+        if (ChatTitleExtractor.isDefaultTitle(session.getTitle())) {
+            updatedTitle = ChatTitleExtractor.extractTitleEssence(userContent);
+            session.setTitle(updatedTitle);
+            session = chatSessionRepository.save(session);
         }
 
         // 2. Persist the user's message
@@ -103,20 +132,67 @@ public class ChatService {
                 .content(userContent)
                 .build());
 
-        // 3. RAG retrieval — find code chunks similar to the question
-        var retrievedContext = codeContextRetriever.retrieve(repo.getId(), userContent);
+        try {
+            // 3. RAG retrieval — find code chunks similar to the question
+            var retrievedContext = codeContextRetriever.retrieve(repo.getId(), userContent);
 
-        // 4. Build LLM prompts from retrieved context + question
-        String systemPrompt = chatPromptBuilder.systemPrompt(repo.getFullName());
-        String userPrompt = chatPromptBuilder.userPrompt(retrievedContext.contextText(), userContent);
+            // 4. Build LLM prompts from retrieved context + question
+            String systemPrompt = chatPromptBuilder.systemPrompt(repo.getFullName());
+            String userPrompt = chatPromptBuilder.userPrompt(retrievedContext.contextText(), userContent);
 
-        // 5. Stream AI model response to the client (SSE)
-        return chatStreamHandler.stream(
-                session.getId(),
-                toMessageResponse(userMessage),
-                retrievedContext.citations(),
-                systemPrompt,
-                userPrompt);
+            // 5. Stream AI model response to the client (SSE)
+            return chatStreamHandler.stream(
+                    session.getId(),
+                    toMessageResponse(userMessage),
+                    retrievedContext.citations(),
+                    systemPrompt,
+                    userPrompt,
+                    updatedTitle);
+        } catch (Exception ex) {
+            String errorMsg = ex.getMessage() != null ? ex.getMessage() : "Error preparing context for AI";
+            String errContent = "⚠️ " + errorMsg;
+            try {
+                chatMessageRepository.save(ChatMessage.builder()
+                        .sessionId(session.getId())
+                        .role(MessageRole.ASSISTANT)
+                        .content(errContent)
+                        .citations("[]")
+                        .build());
+            } catch (Exception saveEx) {
+                
+                log.error("Failed to save error message for session {}", sessionId, saveEx);
+            }
+
+            SseEmitter errorEmitter = new SseEmitter(10000L);
+            try {
+                if (updatedTitle != null) {
+                    errorEmitter.send(SseEmitter.event()
+                            .name("session_updated")
+                            .data("{\"id\":\"" + sessionId + "\",\"title\":\"" + updatedTitle.replace("\"", "\\\"") + "\"}"));
+                }
+                errorEmitter.send(SseEmitter.event()
+                        .name("user_message")
+                        .data(toMessageResponse(userMessage)));
+                errorEmitter.send(SseEmitter.event()
+                        .name("error")
+                        .data("\"" + errorMsg.replace("\"", "\\\"") + "\""));
+            } catch (Exception ignored) { }
+            errorEmitter.completeWithError(ex);
+            return errorEmitter;
+        }
+    }
+
+    @Transactional
+    public ChatMessageResponse saveErrorMessage(UUID userId, UUID sessionId, String errorMessage) {
+        ChatSession session = requireSession(userId, sessionId);
+        String content = errorMessage.startsWith("⚠️") ? errorMessage : "⚠️ " + errorMessage;
+        ChatMessage message = chatMessageRepository.save(ChatMessage.builder()
+                .sessionId(session.getId())
+                .role(MessageRole.ASSISTANT)
+                .content(content)
+                .citations("[]")
+                .build());
+        return toMessageResponse(message);
     }
 
     private ChatSessionResponse toSessionResponse(ChatSession session) {

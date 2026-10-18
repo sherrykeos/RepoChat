@@ -82,6 +82,31 @@ public class GithubApiClient {
         }
         return String.valueOf(content);
     }
+
+    public String getReadme(String accessToken, String owner, String repo) {
+        try {
+            Map<String, Object> body = client(accessToken)
+                    .get()
+                    .uri("/repos/{owner}/{repo}/readme", owner, repo)
+                    .retrieve()
+                    .body(MAP);
+            if (body == null) {
+                return null;
+            }
+            Object encoding = body.get("encoding");
+            Object content = body.get("content");
+            if (content == null) {
+                return null;
+            }
+            if ("base64".equals(String.valueOf(encoding))) {
+                String raw = String.valueOf(content).replaceAll("\\s", "");
+                return new String(Base64.getDecoder().decode(raw), StandardCharsets.UTF_8);
+            }
+            return String.valueOf(content);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
     
     private RestClient client(String accessToken){
           return restClientBuilder

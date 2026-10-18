@@ -9,13 +9,16 @@ import org.springframework.stereotype.Service;
 
 import repochat.backend.entity.User;
 import repochat.backend.services.UserService;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class GithubOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     private final UserService userService;
-    private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+    private final DefaultOAuth2UserService delegate;
+
+    public GithubOAuth2UserService(UserService userService) {
+        this.userService = userService;
+        this.delegate = new DefaultOAuth2UserService();
+    }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

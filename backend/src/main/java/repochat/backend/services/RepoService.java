@@ -99,6 +99,20 @@ public class RepoService {
                 repo.getErrorMessage());
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Object> getReadme(UUID repoId, UUID userId) {
+        Repository repo = requireOwned(repoId, userId);
+        User user = userService.requiredById(userId);
+        String token = userService.decryptAccessToken(user);
+        String content = gitHubApiClient.getReadme(token, repo.getOwner(), repo.getName());
+
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("repositoryId", repo.getId().toString());
+        result.put("name", repo.getName());
+        result.put("content", content);
+        return result;
+    }
+
      public RepositoryResponse toResponse(Repository repo) {
         return new RepositoryResponse(
                 repo.getId(),

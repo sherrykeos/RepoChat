@@ -56,8 +56,16 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
+    @Transactional
     public String decryptAccessToken(User user) {
-        return tokenEncryptor.decrypt(user.getAccessToken());
+        String encrypted = user.getAccessToken();
+        String decrypted = tokenEncryptor.decrypt(encrypted);
+        // Opportunistic migration: if token is in legacy format, upgrade to modern v2 format
+        if (encrypted != null && !encrypted.startsWith(repochat.backend.security.crypto.VersionedTokenEncryptor.V2_PREFIX)) {
+            user.setAccessToken(tokenEncryptor.encrypt(decrypted));
+            userRepository.save(user);
+        }
+        return decrypted;
     }
 
 

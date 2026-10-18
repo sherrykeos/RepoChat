@@ -68,30 +68,24 @@ public class SecurityConfig {
 
     @Bean 
     public AuthenticationSuccessHandler oauth2SuccessHandler(
-            @Value("${app.frontend.url:http://localhost:3000}") String frontendUrl) {
+            @Value("${app.frontend-url:${app.frontend.url:http://localhost:3000}}") String frontendUrl) {
         return (request, response, authentication) -> {
-            String serverName = request.getServerName();
-            String redirectUrl;
-            if (serverName != null && !serverName.equalsIgnoreCase("localhost") && !serverName.equals("127.0.0.1")) {
-                redirectUrl = request.getScheme() + "://" + serverName + ":3000/auth/callback";
-            } else {
-                redirectUrl = frontendUrl + "/auth/callback";
-            }
+            String base = (frontendUrl != null && frontendUrl.endsWith("/")) 
+                    ? frontendUrl.substring(0, frontendUrl.length() - 1) 
+                    : (frontendUrl != null ? frontendUrl : "http://localhost:3000");
+            String redirectUrl = base + "/auth/callback";
             new SimpleUrlAuthenticationSuccessHandler(redirectUrl).onAuthenticationSuccess(request, response, authentication);
         };
     }
     
     @Bean 
     public AuthenticationFailureHandler oauth2FailureHandler(
-            @Value("${app.frontend.url:http://localhost:3000}") String frontendUrl) {
+            @Value("${app.frontend-url:${app.frontend.url:http://localhost:3000}}") String frontendUrl) {
         return (request, response, exception) -> {
-            String serverName = request.getServerName();
-            String redirectUrl;
-            if (serverName != null && !serverName.equalsIgnoreCase("localhost") && !serverName.equals("127.0.0.1")) {
-                redirectUrl = request.getScheme() + "://" + serverName + ":3000/auth/callback?error=auth_failed";
-            } else {
-                redirectUrl = frontendUrl + "/auth/callback?error=auth_failed";
-            }
+            String base = (frontendUrl != null && frontendUrl.endsWith("/")) 
+                    ? frontendUrl.substring(0, frontendUrl.length() - 1) 
+                    : (frontendUrl != null ? frontendUrl : "http://localhost:3000");
+            String redirectUrl = base + "/auth/callback?error=auth_failed";
             new SimpleUrlAuthenticationFailureHandler(redirectUrl).onAuthenticationFailure(request, response, exception);
         };
     }

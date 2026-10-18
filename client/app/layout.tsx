@@ -18,6 +18,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "RepoChat",
   description: "Connect GitHub, index any repository, and chat with your codebase using retrieval-augmented answers and citations.",
+  icons: {
+    icon: [
+      { url: "/RepoChat_logo1.png", type: "image/png" },
+    ],
+    shortcut: "/RepoChat_logo1.png",
+    apple: "/RepoChat_logo1.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

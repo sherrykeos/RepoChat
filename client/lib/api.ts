@@ -76,6 +76,11 @@ export class ApiError extends Error {
 }
 
 export function getApiBaseUrl() {
+  const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "");
+  }
+
   if (typeof window !== "undefined") {
     // If accessed from a mobile phone or remote device on the local network (e.g. 192.168.0.195),
     // automatically target the backend on the same host machine on port 8080
@@ -83,7 +88,7 @@ export function getApiBaseUrl() {
       return `${window.location.protocol}//${window.location.hostname}:8080`;
     }
   }
-  return process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+  return "http://localhost:8080";
 }
 
 export function getGithubLoginUrl() {
